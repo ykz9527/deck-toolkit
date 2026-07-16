@@ -117,7 +117,14 @@
     .anim .story{border:1px solid var(--hairline);background:var(--panel2);padding:22px;display:flex;flex-direction:column;}
     .anim .story .idx{font:800 11px/1 var(--mono);letter-spacing:.14em;color:var(--c4);margin-bottom:14px;}
     .anim .story h3{margin:0 0 8px;font:600 24px/1.1 var(--serif);}
-    .anim .story p{margin:0;color:var(--tx2);font-size:15px;line-height:1.6;min-height:80px;}
+    .anim .story p{margin:0;color:var(--tx2);font-size:15px;line-height:1.6;}
+    /* step list — each row is editable; the active step is lit (drives the reveal) */
+    .an-steps{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:11px;}
+    .an-steps li{padding-left:15px;border-left:2px solid var(--border-faint);opacity:.5;transition:opacity .3s var(--ease),border-color .3s var(--ease);}
+    .an-steps li b{display:block;margin-bottom:4px;font:700 11px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);}
+    .an-steps li span{display:block;color:var(--tx2);font-size:13.5px;line-height:1.55;}
+    .an-steps li.active{opacity:1;border-left-color:var(--c4);}
+    .an-steps li.active b{color:var(--c4);}
     .anim .stage{border:1px solid var(--hairline);background:var(--panel-dk);display:grid;place-items:center;padding:18px;}
     .anim svg{width:100%;height:auto;max-height:320px;}
     .an-node{opacity:0;transition:opacity .5s var(--ease);} .an-node.on{opacity:1;}
@@ -135,6 +142,15 @@
     .edit-hint{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:8;padding:9px 18px;border:1px solid var(--c4);background:rgba(13,11,7,.95);color:var(--c4);font:700 12px/1 var(--mono);border-radius:4px;display:none;}
     .edit-hint.show{display:block;}
     body.editing [data-edit]{outline:1px dashed rgba(201,149,42,.5);outline-offset:3px;cursor:text;border-radius:2px;}
+    /* add / remove controls — injected in edit mode only, never saved or exported */
+    .edit-ctl{font-family:var(--mono);cursor:pointer;}
+    body:not(.editing) .edit-ctl{display:none!important;}
+    body.editing [data-editlist]>*{position:relative;}
+    .add-item{display:inline-block;margin-top:12px;padding:6px 12px;border:1px dashed var(--border);background:transparent;color:var(--muted);font:700 11px/1 var(--mono);letter-spacing:.05em;border-radius:3px;}
+    .add-item:hover{color:var(--c4);border-color:var(--c4);}
+    .del-item{position:absolute;top:5px;right:5px;z-index:3;width:19px;height:19px;padding:0;border:none;border-radius:50%;background:var(--c1);color:#fff;font:700 12px/19px var(--sans);text-align:center;}
+    .readiness .del-item{top:2px;right:0;}
+    .an-steps .del-item{top:-2px;right:0;}
 
     @media (max-width:900px){ .slide{padding-top:78px;} .grid3,.readiness,.apx-grid,.anim{grid-template-columns:1fr;} }
     @media print{ html{scroll-snap-type:none;} .slide{page-break-after:always;} .toolbar,.edit-hint{display:none;} }
@@ -184,7 +200,7 @@
     <div class="frame">
       <p class="label hot" data-edit>是什么 · 一分钟看懂</p>
       <h2 data-edit>用一句话 + 几个词,把它讲清。</h2>
-      <div class="grid3">
+      <div class="grid3" data-editlist="concepts">
         <div class="card"><em data-edit>核心概念 A</em><h3 data-edit>名词 A</h3><p data-edit>一句大白话解释,<b>加粗关键点</b>。</p></div>
         <div class="card" style="border-top-color:var(--c1)"><em data-edit>核心概念 B</em><h3 data-edit>名词 B</h3><p data-edit>一句大白话解释。</p></div>
         <div class="card" style="border-top-color:var(--c3)"><em data-edit>核心概念 C</em><h3 data-edit>名词 C</h3><p data-edit>一句大白话解释。</p></div>
@@ -202,9 +218,13 @@
       <h2 data-edit>把它的招牌流程,一步步演给你看。</h2>
       <div class="anim" contenteditable="false">
         <aside class="story">
-          <div class="idx"><span id="anStep">0</span> / <span id="anTot">3</span></div>
-          <h3 id="anName">就绪</h3>
-          <p id="anDesc">点「播放」看它一步步跑起来。把这段换成对当前项目真实流程每一步的解说。</p>
+          <div class="idx">STEP <span id="anStep">0</span> / <span id="anTot">3</span></div>
+          <ol class="an-steps" data-editlist="anim-steps">
+            <li data-s="0"><b data-edit>就绪</b><span data-edit>点「播放」看它一步步跑起来。把每一步换成对真实流程的解说。</span></li>
+            <li data-s="1"><b data-edit>第 1 步</b><span data-edit>第一步在做什么(用产品真实措辞)。</span></li>
+            <li data-s="2"><b data-edit>第 2 步</b><span data-edit>第二步在做什么。</span></li>
+            <li data-s="3"><b data-edit>产出</b><span data-edit>最终得到什么。</span></li>
+          </ol>
         </aside>
         <section class="stage">
           <svg viewBox="0 0 460 240" preserveAspectRatio="xMidYMid meet">
@@ -245,9 +265,9 @@
       <p class="label" data-edit>现状全景</p>
       <h2 data-edit>已上线、推进中、规划视野,一图看清。</h2>
       <div class="readiness">
-        <article><div class="rh">● 已上线</div><ul><li data-edit><b>真实</b>已交付的能力</li><li data-edit>再一条</li></ul></article>
-        <article><div class="rh">● 推进中</div><ul><li data-edit>正在做、还没完成的</li><li data-edit>再一条</li></ul></article>
-        <article><div class="rh">● 规划视野</div><ul><li data-edit>方向,尚未动工</li><li data-edit>再一条</li></ul></article>
+        <article><div class="rh">● 已上线</div><ul data-editlist="ready-shipped"><li data-edit><b>真实</b>已交付的能力</li><li data-edit>再一条</li></ul></article>
+        <article><div class="rh">● 推进中</div><ul data-editlist="ready-progress"><li data-edit>正在做、还没完成的</li><li data-edit>再一条</li></ul></article>
+        <article><div class="rh">● 规划视野</div><ul data-editlist="ready-planned"><li data-edit>方向,尚未动工</li><li data-edit>再一条</li></ul></article>
       </div>
       <p class="note-foot" data-edit><b>诚实口径</b> · 越往右越是方向而非已交付;每一档都对应仓库里可查的真实进度,不含未经证据的数字。</p>
     </div>
@@ -269,7 +289,7 @@
       <p class="label" data-edit>附录 · 系统架构</p>
       <h2 data-edit>一句话概括这张图讲什么。</h2>
       <div class="apx-fig"><img class="fig-dark" src="fig-architecture.svg" alt="架构图"><img class="fig-warm" src="fig-architecture-warm.svg" alt="架构图"></div>
-      <div class="apx-grid">
+      <div class="apx-grid" data-editlist="apx-points">
         <div class="apx"><b data-edit>要点一 <span class="st">已上线</span></b><p data-edit>配合图讲清的一条,<code>代码锚点</code>。</p></div>
         <div class="apx"><b data-edit>要点二 <span class="st p">部分落地</span></b><p data-edit>另一条。</p></div>
       </div>
@@ -286,7 +306,7 @@
   <button onclick="exportHTML()" title="导出编辑后的 HTML">⭳</button>
   <button onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()" title="全屏">⤢</button>
 </div>
-<div class="edit-hint" id="editHint">编辑模式 · 点文字直接改,自动保存本地 · 再点 ✎ 退出 · ⭳ 导出</div>
+<div class="edit-hint" id="editHint">编辑模式 · 点文字直接改 · 列表旁「+ 添加」/条目上「×」删除 · 自动存本地 · ✎ 退出 · ⭳ 导出</div>
 
 <script>
   /* ---------- paging ---------- */
@@ -301,39 +321,85 @@
   function toggleTheme(){ var c=document.documentElement.getAttribute('data-theme')==='warm'?'warm':'dark'; var n=c==='warm'?'dark':'warm'; applyTheme(n); try{localStorage.setItem(THEME_KEY,n);}catch(e){} }
   (function(){var t;try{t=localStorage.getItem(THEME_KEY);}catch(e){}applyTheme(t==='warm'?'warm':'dark');})();
 
-  /* ---------- edit mode (click-to-edit + localStorage + export) ---------- */
+  /* ---------- edit mode: text edits + add / remove list items ----------
+     Two persistence lanes, both survive reload AND export:
+       • [data-edit] OUTSIDE a list  → stored by index (order is fixed).
+       • [data-editlist="name"]      → whole region stored by name, so adding /
+         removing / editing its items all persist.
+     The + / × controls are injected only while editing and are stripped
+     before saving and before export (class .edit-ctl). */
   var STORE_KEY='deck_edits';
-  var editables=[].slice.call(document.querySelectorAll('[data-edit]'));
-  function loadEdits(){var r;try{r=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){r={};}editables.forEach(function(el,i){if(r[i]!=null)el.innerHTML=r[i];});}
-  function saveEdits(){var o={};editables.forEach(function(el,i){o[i]=el.innerHTML;});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
-  function toggleEdit(){var on=document.body.classList.toggle('editing');document.getElementById('editBtn').classList.toggle('on',on);document.getElementById('editHint').classList.toggle('show',on);editables.forEach(function(el){el.contentEditable=on?'true':'false';});if(!on)saveEdits();}
-  document.addEventListener('input',function(e){if(e.target&&e.target.hasAttribute&&e.target.hasAttribute('data-edit'))saveEdits();});
-  function exportHTML(){if(document.body.classList.contains('editing'))toggleEdit();var c=document.documentElement.cloneNode(true);c.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');});var h='<!DOCTYPE html>\n'+c.outerHTML;var b=new Blob([h],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='deck.html';a.click();}
-  loadEdits();
+  var allEd=[].slice.call(document.querySelectorAll('[data-edit]'));
+  var lists=[].slice.call(document.querySelectorAll('[data-editlist]'));
+  var idxEd=allEd.filter(function(el){return !el.closest('[data-editlist]');});
 
-  /* ---------- animation scaffold (adapt per project) ----------
-     anStep drives which nodes/edges are revealed. Extend STEPS with real
-     story text + reveal targets for the project's actual flow. */
-  var AN_STEPS=[
-    {name:'就绪',desc:'点「播放」看它一步步跑起来。把这段换成对真实流程每一步的解说。'},
-    {name:'第 1 步',desc:'第一步在做什么(用产品真实措辞)。'},
-    {name:'第 2 步',desc:'第二步在做什么。'},
-    {name:'产出',desc:'最终得到什么。'}
-  ];
+  function cleanHTML(el){var c=el.cloneNode(true);c.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});c.querySelectorAll('[contenteditable]').forEach(function(e){e.removeAttribute('contenteditable');});return c.innerHTML;}
+  function saveAll(){var o={t:{},l:{}};idxEd.forEach(function(el,i){o.t[i]=el.innerHTML;});lists.forEach(function(el){o.l[el.getAttribute('data-editlist')]=cleanHTML(el);});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
+  function loadAll(){var r;try{r=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){r={};}if(r.l)lists.forEach(function(el){var v=r.l[el.getAttribute('data-editlist')];if(v!=null)el.innerHTML=v;});if(r.t)idxEd.forEach(function(el,i){if(r.t[i]!=null)el.innerHTML=r.t[i];});}
+
+  function reindex(list){var i=0;[].slice.call(list.querySelectorAll(':scope > *:not(.edit-ctl)')).forEach(function(el){el.setAttribute('data-s',i++);});}
+  function decorateItem(item){
+    if(item.classList.contains('edit-ctl')||item.querySelector(':scope > .del-item'))return;
+    var b=document.createElement('button');b.className='edit-ctl del-item';b.type='button';b.textContent='×';b.title='删除这条';b.setAttribute('contenteditable','false');
+    b.addEventListener('click',function(){var list=item.parentNode;item.remove();if(list.getAttribute('data-editlist')==='anim-steps'){reindex(list);if(anStep>anItems().length-1)anStep=anItems().length-1;anRender();}saveAll();});
+    item.appendChild(b);
+  }
+  function decorateList(list){
+    [].slice.call(list.children).forEach(decorateItem);
+    var nx=list.nextElementSibling;if(nx&&nx.classList&&nx.classList.contains('add-item'))return;
+    var add=document.createElement('button');add.className='edit-ctl add-item';add.type='button';add.textContent='+ 添加';add.setAttribute('contenteditable','false');
+    add.addEventListener('click',function(){addItem(list);});
+    list.parentNode.insertBefore(add,list.nextSibling);
+  }
+  function addItem(list){
+    var proto=list.querySelector(':scope > *:not(.edit-ctl)');if(!proto)return;
+    var clone=proto.cloneNode(true);clone.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});
+    var editing=document.body.classList.contains('editing');
+    var eds=(clone.hasAttribute('data-edit')?[clone]:[]).concat([].slice.call(clone.querySelectorAll('[data-edit]')));
+    eds.forEach(function(e){e.contentEditable=editing?'true':'false';});
+    list.appendChild(clone);
+    if(list.getAttribute('data-editlist')==='anim-steps'){reindex(list);anRender();}
+    if(editing)decorateItem(clone);
+    saveAll();
+  }
+
+  function toggleEdit(){
+    var on=document.body.classList.toggle('editing');
+    document.getElementById('editBtn').classList.toggle('on',on);
+    document.getElementById('editHint').classList.toggle('show',on);
+    allEd.forEach(function(el){el.contentEditable=on?'true':'false';});
+    if(on)lists.forEach(decorateList);
+    else{document.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});saveAll();}
+  }
+  document.addEventListener('input',function(e){if(e.target&&e.target.closest&&e.target.closest('[data-edit]'))saveAll();});
+  function exportHTML(){
+    if(document.body.classList.contains('editing'))toggleEdit();
+    var c=document.documentElement.cloneNode(true);
+    c.querySelectorAll('.edit-ctl').forEach(function(el){el.remove();});
+    c.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');});
+    var bd=c.querySelector('body');if(bd)bd.classList.remove('editing');
+    var h='<!DOCTYPE html>\n'+c.outerHTML;var b=new Blob([h],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='deck.html';a.click();
+  }
+  loadAll();
+
+  /* ---------- animation: steps are read from the editable list in the DOM ----------
+     Adding / editing / deleting a step in edit mode changes the walk-through
+     directly. Node/edge reveal is keyed on data-s < current step. */
+  var anList=document.querySelector('[data-editlist="anim-steps"]');
+  function anItems(){return anList?[].slice.call(anList.querySelectorAll(':scope > li')):[];}
   var anStep=0, anTimer=null;
   function anRender(){
-    var s=AN_STEPS[anStep];
-    document.getElementById('anStep').textContent=anStep;
-    document.getElementById('anName').textContent=s.name;
-    document.getElementById('anDesc').textContent=s.desc;
-    document.querySelectorAll('.an-node,.an-edge').forEach(function(el){
-      el.classList.toggle('on', parseInt(el.getAttribute('data-s'),10) < anStep);
-    });
+    var items=anItems(),n=items.length;
+    if(anStep>n-1)anStep=n-1;if(anStep<0)anStep=0;
+    items.forEach(function(li,i){li.classList.toggle('active',i===anStep);});
+    var cs=document.getElementById('anStep');if(cs)cs.textContent=anStep;
+    var ct=document.getElementById('anTot');if(ct)ct.textContent=Math.max(0,n-1);
+    document.querySelectorAll('.an-node,.an-edge').forEach(function(el){el.classList.toggle('on',parseInt(el.getAttribute('data-s'),10)<anStep);});
   }
   function anStop(){ if(anTimer){clearInterval(anTimer);anTimer=null;} }
-  function anSet(n){ anStop(); anStep=Math.max(0,Math.min(AN_STEPS.length-1,n)); anRender(); }
-  function anNext(){ anStop(); if(anStep<AN_STEPS.length-1){anStep++;anRender();} }
-  function anPlay(){ anStop(); anSet(0); anTimer=setInterval(function(){ if(anStep>=AN_STEPS.length-1){anStop();return;} anStep++; anRender(); },900); }
+  function anSet(n){ anStop(); anStep=n; anRender(); }
+  function anNext(){ anStop(); if(anStep<anItems().length-1){anStep++;anRender();} }
+  function anPlay(){ anStop(); anSet(0); anTimer=setInterval(function(){ if(anStep>=anItems().length-1){anStop();return;} anStep++; anRender(); },900); }
   anRender();
 </script>
 </body>

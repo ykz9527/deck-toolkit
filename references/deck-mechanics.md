@@ -22,7 +22,12 @@ The template includes one worked example of each type: **cover, concept/vocabula
 
 ## Edit mode
 
-Elements with a bare `data-edit` attribute become click-to-edit in edit mode (✎). Edits persist to `localStorage` (keyed by index) and ⭳ exports a clean standalone HTML. Put `data-edit` on every text element the user might reword. Keep non-text/interactive containers out of it (`contenteditable="false"` on animation wrappers).
+Edit mode (✎) lets the presenter reword and restructure the deck in the browser, then ⭳ export a clean standalone HTML. Two lanes, both survive reload **and** export:
+
+- **Text — `data-edit`.** Any element with a bare `data-edit` becomes click-to-edit. Stored in `localStorage` keyed by index (order is fixed). Put it on every text element the user might reword.
+- **Repeatable content — `data-editlist="name"`.** Wrap a container of like items (the concept cards, each readiness column's `<ul>`, the appendix points, the animation step list) in `data-editlist`. In edit mode each such container grows a **"+ 添加"** button and each item a **"×"** delete. The whole region is persisted by name (its cleaned `innerHTML`), so adding / removing / editing items all stick. Give each list a unique name.
+
+The +/× controls carry class `edit-ctl`, are injected only while editing, and are stripped before both save and export — never hand-author them. A `data-edit` element **inside** a `data-editlist` is persisted by the region, not by index (don't double-count it). Keep non-text/interactive containers out of editing (`contenteditable="false"` on the animation wrapper; the editable step rows inside re-enable themselves).
 
 ## Static diagrams (drawio skill)
 
@@ -57,7 +62,8 @@ For each chosen moment, go to the specs/docs/code and pull the *real* thing: the
 
 - Reproduce the real UI's layout and language: same panels, same step names, same shapes the product actually shows. Read the actual frontend/components if they exist, and match their visual grammar.
 - **Staged reveal, click-driven** is the base grammar: a left **story column** narrates the current step; a right **stage** (inline SVG) advances as steps progress. Controls: ▶ play (auto-advance), › next (one discrete step), reset.
-- **Discrete stepping is a real requirement:** "next" must advance exactly one step, not behave like play. Keep the play interval in a module-level variable and clear it (`anStop()`) at the top of next/reset/play — otherwise a lingering timer makes "next" auto-run. (The template's `AN_STEPS`/`anStop`/`anNext`/`anPlay` show the pattern.)
+- **Discrete stepping is a real requirement:** "next" must advance exactly one step, not behave like play. Keep the play interval in a module-level variable and clear it (`anStop()`) at the top of next/reset/play — otherwise a lingering timer makes "next" auto-run. (The template's `anStop`/`anNext`/`anPlay` show the pattern.)
+- **Step narration lives in the DOM, not a JS array.** The story column is an editable `<ol class="an-steps" data-editlist="anim-steps">` — one `<li>` (name + desc) per step, the active one lit. `anRender()` reads the steps from this list, so the presenter can edit/add/delete steps in edit mode and the walk-through updates live (and exports). Redraw the SVG to the real flow; node/edge reveal stays keyed on `data-s < current step`.
 
 **Pick the interaction FORM that fits the idea — don't reflex to "reveal boxes left-to-right".** A menu, roughly by what the design idea is:
 
@@ -81,7 +87,7 @@ Combine sparingly. The richness that matters is *fidelity to the real mechanism*
 
 ### The scaffold
 
-`assets/deck-template.html` ships a minimal working scaffold: `AN_STEPS` array (name + desc per step) driving `.an-node[data-s]` / `.an-edge[data-s]` reveal, with play/next/reset wired correctly. Extend `AN_STEPS` and redraw the SVG to match the project's real flow. For a rich product UI, expect this to grow into a bespoke SVG scene — that's expected; the scaffold is the starting grammar, not the ceiling.
+`assets/deck-template.html` ships a minimal working scaffold: the editable `.an-steps` list (name + desc per step) driving `.an-node[data-s]` / `.an-edge[data-s]` reveal, with play/next/reset wired correctly. Add/edit steps in the list and redraw the SVG to match the project's real flow. For a rich product UI, expect this to grow into a bespoke SVG scene — that's expected; the scaffold is the starting grammar, not the ceiling.
 
 ## Light dynamic touch — reveal-on-view (cheap, tasteful)
 

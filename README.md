@@ -100,7 +100,7 @@ Both agents load `SKILL.md` on demand when your request matches its description,
 - **Dark / warm editorial theme** with a toggle — no "AI slop" (no gradients, colorful badges, or emoji icons).
 - **An honest, repeatable narrative** — a mainline the audience can repeat back, with graded honesty (shipped / partial / planned).
 - **2–3 hand-built interactive demos** that mimic the project's real signature workflow, each arguing one design principle.
-- **Click-to-edit mode** with localStorage persistence and export to a clean standalone HTML.
+- **Click-to-edit mode** — reword any text, and add / remove list items, cards, and animation steps in the browser; persists to localStorage and exports to a clean standalone HTML.
 
 ---
 
