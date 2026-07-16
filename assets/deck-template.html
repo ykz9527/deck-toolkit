@@ -146,8 +146,10 @@
     .edit-ctl{font-family:var(--mono);cursor:pointer;}
     body:not(.editing) .edit-ctl{display:none!important;}
     body.editing [data-editlist]>*{position:relative;}
-    .add-item{display:inline-block;margin-top:12px;padding:6px 12px;border:1px dashed var(--border);background:transparent;color:var(--muted);font:700 11px/1 var(--mono);letter-spacing:.05em;border-radius:3px;}
+    .add-item{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;padding:8px 14px;border:1px dashed var(--border);background:transparent;color:var(--muted);font:700 11px/1 var(--mono);letter-spacing:.05em;border-radius:3px;}
     .add-item:hover{color:var(--c4);border-color:var(--c4);}
+    /* inside a multi-column grid, the add control fills the next cell (not stranded bottom-left) */
+    .grid3 .add-item,.apx-grid .add-item{margin-top:0;min-height:60px;}
     .del-item{position:absolute;top:5px;right:5px;z-index:3;width:19px;height:19px;padding:0;border:none;border-radius:50%;background:var(--c1);color:#fff;font:700 12px/19px var(--sans);text-align:center;}
     .readiness .del-item{top:2px;right:0;}
     .an-steps .del-item{top:-2px;right:0;}
@@ -332,6 +334,10 @@
   var allEd=[].slice.call(document.querySelectorAll('[data-edit]'));
   var lists=[].slice.call(document.querySelectorAll('[data-editlist]'));
   var idxEd=allEd.filter(function(el){return !el.closest('[data-editlist]');});
+  /* pristine per-list item template, captured before any load/edit, so "+ add"
+     still works after every item has been deleted */
+  var protos={};
+  lists.forEach(function(l){var f=l.querySelector(':scope > *');if(f)protos[l.getAttribute('data-editlist')]=f.cloneNode(true);});
 
   function cleanHTML(el){var c=el.cloneNode(true);c.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});c.querySelectorAll('[contenteditable]').forEach(function(e){e.removeAttribute('contenteditable');});return c.innerHTML;}
   function saveAll(){var o={t:{},l:{}};idxEd.forEach(function(el,i){o.t[i]=el.innerHTML;});lists.forEach(function(el){o.l[el.getAttribute('data-editlist')]=cleanHTML(el);});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
@@ -346,19 +352,20 @@
   }
   function decorateList(list){
     [].slice.call(list.children).forEach(decorateItem);
-    var nx=list.nextElementSibling;if(nx&&nx.classList&&nx.classList.contains('add-item'))return;
+    if(list.querySelector(':scope > .add-item'))return;
     var add=document.createElement('button');add.className='edit-ctl add-item';add.type='button';add.textContent='+ 添加';add.setAttribute('contenteditable','false');
     add.addEventListener('click',function(){addItem(list);});
-    list.parentNode.insertBefore(add,list.nextSibling);
+    list.appendChild(add); /* lives inside the region: fills the next grid cell / list tail */
   }
   function addItem(list){
-    var proto=list.querySelector(':scope > *:not(.edit-ctl)');if(!proto)return;
-    var clone=proto.cloneNode(true);clone.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});
+    var name=list.getAttribute('data-editlist');
+    var src=list.querySelector(':scope > *:not(.edit-ctl)')||protos[name];if(!src)return;
+    var clone=src.cloneNode(true);clone.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});
     var editing=document.body.classList.contains('editing');
     var eds=(clone.hasAttribute('data-edit')?[clone]:[]).concat([].slice.call(clone.querySelectorAll('[data-edit]')));
     eds.forEach(function(e){e.contentEditable=editing?'true':'false';});
-    list.appendChild(clone);
-    if(list.getAttribute('data-editlist')==='anim-steps'){reindex(list);anRender();}
+    list.insertBefore(clone,list.querySelector(':scope > .add-item')); /* keep the add control last */
+    if(name==='anim-steps'){reindex(list);anRender();}
     if(editing)decorateItem(clone);
     saveAll();
   }
