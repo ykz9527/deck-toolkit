@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Serve the deck's directory on 0.0.0.0 so a browser (incl. LAN) can view it.
-# Usage: ./serve.sh path/to/deck.html [port]
+# Usage: ./serve.sh [path/to/deck.html] [port]
+# Default target is the project's conventional output: showcase_deck/index.html
 set -u
-F="${1:?usage: serve.sh <deck.html> [port]}"
+F="${1:-showcase_deck/index.html}"
+[ -f "$F" ] || { echo "no deck at: $F  (build it to showcase_deck/index.html first)"; exit 1; }
 PORT="${2:-8770}"
 DIR="$(cd "$(dirname "$F")" && pwd)"
 BASE="$(basename "$F")"

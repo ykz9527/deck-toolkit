@@ -97,6 +97,10 @@ Beyond the 2–3 hand-built interactions, a *subtle* way to add life is to let a
 - **Gate the hidden state on `body.js`** (JS adds the class) so no-JS, print, and `prefers-reduced-motion` render everything visible — never hide content behind an effect.
 - Drive it with one `IntersectionObserver` that toggles a `seen` class on entry (and off on exit, so it replays). Keep it restrained: no buttons, no bounce — just a quiet build-in that reinforces the slide's point.
 
-## Self-check before serving
+## Output location & preview
 
-Run `scripts/verify.sh`: balanced tags, no external URLs, both themes wired, `data-edit` present, animation controls present. Then `scripts/serve.sh` on `0.0.0.0` and give the user the URL. Iterate on the rendered page (both themes), not on descriptions.
+Build the deck to **`showcase_deck/index.html` in the project root** (create the folder). Keep any drawio SVG figures beside it in the same folder — the deck references them by relative path (`fig-architecture.svg`, `fig-architecture-warm.svg`), and serving the folder resolves them. One project = one `showcase_deck/`; when improving an existing deck, it already lives here.
+
+## Self-check, then serve (always)
+
+Run `scripts/verify.sh showcase_deck/index.html`: balanced tags, no external URLs, both themes wired, `data-edit` present, animation controls present. Then **always** launch the preview — `scripts/serve.sh` (no-arg defaults to `showcase_deck/index.html`, binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.

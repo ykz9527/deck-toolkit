@@ -43,7 +43,7 @@ The skill walks the agent through six steps — from reading the repo to serving
 3. **Fill the template** — one assertion per slide title, one visual as its evidence.
 4. **Build 2–3 interactive moments** — faithful to the real product UI, each dramatizing one design principle.
 5. **Static diagrams** — architecture / schema / flow via the drawio skill, styled to the palette.
-6. **Self-check and serve** — `scripts/verify.sh` for single-file integrity, `scripts/serve.sh` to view in a browser.
+6. **Self-check and serve** — the deck is written to `showcase_deck/index.html` in the project; `scripts/verify.sh` checks single-file integrity and `scripts/serve.sh` auto-starts a local preview so you can view it in a browser right away.
 
 ---
 
