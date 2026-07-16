@@ -29,13 +29,18 @@ Edit mode (✎) lets the presenter reword and restructure the deck in the browse
 
 The +/× controls carry class `edit-ctl`, are injected only while editing, and are stripped before both save and export — never hand-author them. A `data-edit` element **inside** a `data-editlist` is persisted by the region, not by index (don't double-count it). Keep non-text/interactive containers out of editing (`contenteditable="false"` on the animation wrapper; the editable step rows inside re-enable themselves).
 
-## Static diagrams (drawio skill)
+## Static diagrams — required, drawio preferred, SVG fallback
 
-For architecture / schema / flow diagrams:
+A deck without an architecture picture is incomplete. Every deck needs **at least a story-level architecture diagram and one appendix diagram**. Two ways to make them, in order of preference:
+
+**Preferred — the drawio skill:**
 1. Use the **drawio skill** to author a `.drawio` and export **SVG**, styled to the deck palette (dark fills, light text, earth-tone accent strokes, transparent background).
 2. For theme support, produce a **warm variant** (swap dark fills→warm, light text→ink, neutral strokes→dark; keep colored accents) and export a second SVG.
 3. Inline/reference both as a `.fig-dark` / `.fig-warm` pair inside `.apx-fig`; CSS swaps them by theme.
-- If the environment lacks the drawio CLI, note the AppImage-extract + `xvfb` path (headless export needs a virtual display; pure-headless segfaults).
+
+**Check availability first.** The drawio skill needs the drawio CLI, or an extracted AppImage + `xvfb` (headless export needs a virtual display; pure-headless segfaults). If that toolchain isn't set up, don't burn the whole task trying to install it.
+
+**Fallback — hand-authored inline SVG (when drawio tooling is absent):** do NOT skip the diagram. Hand-write a clean `<svg>` in the deck palette, exactly like the animation stages — dark fills, light text (`var(--tx-hi)`), earth-tone accent strokes, mono labels, ≤~7 elements, every arrow and color carrying one clear meaning. Put it in the same `.apx-fig` slot. It won't be as polished as drawio, but a faithful hand-drawn diagram beats an unillustrated architecture every time. (Skip the warm-variant pair if hand-authoring is costly — one palette-appropriate SVG on a `.screen`-style dark panel is fine.)
 
 ## Animations — interaction that argues the design idea
 
@@ -43,7 +48,9 @@ The most impactful (and hardest) piece. **Design it from your repo understanding
 
 ### Step 0 — decide WHICH slides get interaction (and how many)
 
-Don't ship exactly one token demo. Budget **2–3 interactive moments** for a real deck, chosen deliberately. A slide earns interaction only when *seeing it move* teaches something a static picture can't. Walk the mainline and ask at each candidate: **which design principle does this project live or die on, and would an interaction let the audience feel it?**
+Don't ship exactly one token demo. The floor is **2 interactive moments, aim for 3** — but chosen deliberately, never padded. A slide earns interaction only when *seeing it move* teaches something a static picture can't. Walk the mainline and ask at each candidate: **which design principle does this project live or die on, and would an interaction let the audience feel it?**
+
+**The floor and the quality bar are both hard — and quality wins ties.** Never add an interaction just to reach the count; a hollow "for interaction's sake" demo is worse than a strong static slide. But "I only found one" is usually not a real ceiling — it's a signal you don't yet understand the repo deeply enough. Go back and read more: the real workflow code, the specs, the data model, the module that implements the differentiator. The material for a genuine second (and third) interaction almost always surfaces once you see the project clearly. Research harder before you settle for fewer.
 
 Common earners (pick the ones true for THIS repo):
 
