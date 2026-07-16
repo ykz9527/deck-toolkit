@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TITLE: replace with "<Project> — <one-line positioning>" -->
+  <title>PROJECT — one-line positioning</title>
+  <style>
+    /* =========================================================
+       DESIGN SYSTEM  (do not "improve" into gradients/badges/rounded-everything)
+       Dark is the default; warm is an additive override. Neutral scale is tokenized
+       so both themes work; semantic accent colors are the SAME in both themes.
+       To recolor semantics for a different project, change the --c-* accents only.
+       ========================================================= */
+    :root {
+      --bg:#060606; --paper:#f2eee4; --ink:#15130f; --white:#fff; --muted:#8d8d8d; --dim:#5c5c5c;
+      --hairline:rgba(255,255,255,.13);
+      --panel:#0d0d0d; --panel2:#0b0b0b; --panel-dk:#080808; --border:#3a3a3a; --border-faint:#202020;
+      --tx-hi:#e8e2d6; --tx2:#b0b0b0; --tx3:#8f8f8f;
+      /* semantic accents — rename/recolor per project, keep restrained + earthy */
+      --c1:#d8553d; --c2:#7a746a; --c3:#2e6e6a; --c4:#c9952a; --c5:#3c5a86;
+      --live:#4f9d76; --partial:#c9952a; --design:#8d8d8d;
+      --serif:Georgia,"Times New Roman","Noto Serif SC",serif;
+      --sans:"Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+      --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+      --ease:cubic-bezier(.4,0,.2,1);
+    }
+    :root[data-theme="warm"]{
+      --bg:#efe9dd; --white:#17140e; --muted:#7c7568; --dim:#a49d8f; --hairline:rgba(21,19,15,.14);
+      --panel:#e7e1d2; --panel2:#e9e3d4; --panel-dk:#ded7c7; --border:#cfc7b4; --border-faint:#dad2c1;
+      --tx-hi:#2c271d; --tx2:#5a554c; --tx3:#7c7568;
+    }
+    /* animation slides stay dark in BOTH themes (intentional "product screen") */
+    .slide.screen{ background:#060606; color:var(--white);
+      --bg:#060606; --white:#fff; --muted:#8d8d8d; --dim:#5c5c5c; --hairline:rgba(255,255,255,.13);
+      --panel:#0d0d0d; --panel2:#0b0b0b; --panel-dk:#080808; --border:#3a3a3a; --tx-hi:#e8e2d6; --tx2:#b0b0b0; --tx3:#8f8f8f; }
+
+    *{box-sizing:border-box;}
+    html{background:var(--bg);scroll-snap-type:y mandatory;}
+    body{margin:0;color:var(--white);background:var(--bg);font-family:var(--sans);font-size:17px;-webkit-font-smoothing:antialiased;}
+    .deck{counter-reset:page;}
+    .slide{position:relative;min-height:100svh;display:grid;align-items:center;padding:90px clamp(22px,6vw,84px) 60px;overflow:hidden;scroll-snap-align:start;counter-increment:page;}
+    .slide::after{content:counter(page,decimal-leading-zero);position:absolute;right:clamp(22px,3vw,46px);bottom:24px;color:var(--dim);font:700 11px/1 var(--mono);letter-spacing:.12em;}
+    .slide.appendix{background:var(--panel-dk);}
+    .frame{position:relative;z-index:1;width:min(1260px,100%);margin:0 auto;}
+
+    /* nav = the ONLY mainline signpost. words read as a line; highlight current. */
+    .nav{position:absolute;z-index:4;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:17px clamp(22px,4vw,52px);border-bottom:1px solid transparent;}
+    .nav.bordered{border-color:var(--hairline);}
+    .brand{display:flex;align-items:center;gap:9px;color:inherit;font-size:15px;font-weight:800;text-decoration:none;}
+    .brand i{display:block;width:17px;height:17px;border-radius:4px;background:currentColor;}
+    .nav-links{display:flex;gap:20px;color:var(--muted);font-size:13px;font-weight:650;}
+    .nav-links span.active{color:inherit;}
+
+    .label{display:flex;align-items:center;gap:9px;margin:0 0 16px;color:var(--muted);font:750 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;}
+    .label::before{content:"";width:18px;height:1px;background:currentColor;}
+    .label.hot{color:var(--c4);}
+    h1,h2,h3,p{margin-top:0;}
+    h1{max-width:990px;margin-bottom:20px;font:600 clamp(42px,6vw,86px)/1.01 var(--serif);letter-spacing:-.05em;}
+    h2{max-width:950px;margin-bottom:18px;font:600 clamp(31px,4.4vw,60px)/1.05 var(--serif);letter-spacing:-.04em;}
+    h3{margin-bottom:7px;font-size:17px;line-height:1.25;}
+    .lede{max-width:820px;color:var(--tx2);font-size:clamp(17px,1.7vw,22px);line-height:1.62;}
+    .accent{color:var(--c4);}
+    .note-foot{margin-top:26px;padding-top:12px;border-top:1px solid var(--hairline);color:var(--tx3);font-size:14.5px;line-height:1.6;}
+    .note-foot b{color:var(--tx-hi);font-weight:600;}
+    /* honesty tags — shipped / partial / planned */
+    .st{font:800 9px/1 var(--mono);letter-spacing:.06em;color:var(--live);}
+    .st.p{color:var(--partial);} .st.d{color:var(--design);}
+
+    /* cover — TYPE-LED editorial hero (DEFAULT). Do NOT ship the generic
+       "floating rotated cards" hero — it reads as templated and looks the same
+       for every project. Choose a hero that fits THIS project (see HTML comment). */
+    .cover .frame{width:min(1160px,100%);}
+    .cover h1{font:600 clamp(50px,7.4vw,108px)/.97 var(--serif);letter-spacing:-.055em;max-width:16ch;margin-bottom:22px;}
+    .official{margin-top:30px;padding:18px 22px;border-left:2px solid var(--c4);background:var(--panel);color:var(--tx-hi);font-size:16px;line-height:1.7;max-width:700px;}
+    .official b{color:var(--c4);}
+    .cover-meta{display:flex;gap:clamp(24px,4vw,54px);margin-top:36px;flex-wrap:wrap;}
+    .cover-meta div{border-top:1px solid var(--hairline);padding-top:11px;min-width:120px;}
+    .cover-meta em{display:block;margin-bottom:6px;font:750 10px/1 var(--mono);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+    .cover-meta b{font:600 21px/1.1 var(--serif);color:var(--tx-hi);}
+
+    /* concept grid (vocabulary / "what is it") */
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px;}
+    .card{padding:20px;border:1px solid var(--hairline);background:var(--panel);border-top:3px solid var(--c5);}
+    .card em{display:block;margin-bottom:9px;font:800 10px/1 var(--mono);font-style:normal;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+    .card h3{font:600 20px/1.15 var(--serif);}
+    .card p{margin:0;color:var(--tx2);font-size:14.5px;line-height:1.55;} .card p b{color:var(--tx-hi);font-weight:600;}
+
+    /* value slide */
+    .benefit-num{display:inline-flex;align-items:baseline;gap:12px;margin-bottom:14px;}
+    .benefit-num em{font:700 34px/1 var(--serif);font-style:normal;color:var(--c4);}
+    .benefit-num span{color:var(--muted);font:750 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;}
+
+    /* status / readiness grid */
+    .readiness{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:24px;border:1px solid var(--hairline);background:var(--hairline);}
+    .readiness article{padding:24px;background:var(--panel);}
+    .readiness .rh{display:flex;align-items:center;gap:9px;margin-bottom:15px;font:800 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;}
+    .readiness article:nth-child(1) .rh{color:var(--live);} .readiness article:nth-child(2) .rh{color:var(--partial);} .readiness article:nth-child(3) .rh{color:#c07a5c;}
+    .readiness ul{margin:0;padding-left:17px;color:var(--tx2);font-size:14.5px;line-height:1.8;} .readiness ul b{color:var(--tx-hi);font-weight:700;}
+
+    /* appendix */
+    .apx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:22px;}
+    .apx{padding:18px 20px;border:1px solid var(--hairline);background:var(--panel);border-left:2px solid var(--border);}
+    .apx b{display:block;margin-bottom:6px;color:var(--white);font-size:15px;font-weight:700;}
+    .apx p{margin:0;color:var(--tx2);font-size:13.5px;line-height:1.55;} .apx p code{color:var(--tx-hi);font:12px var(--mono);}
+    /* appendix figure: dark/warm SVG pair (from drawio skill), swapped by theme */
+    .apx-fig{margin:18px auto 0;max-width:820px;text-align:center;}
+    .apx-fig img{width:100%;height:auto;max-height:52vh;object-fit:contain;}
+    .apx-fig .fig-warm{display:none;}
+    :root[data-theme="warm"] .apx-fig .fig-dark{display:none;}
+    :root[data-theme="warm"] .apx-fig .fig-warm{display:inline-block;}
+
+    /* ===== interactive animation scaffold (HAND-authored SVG; mimic THIS product's real flow) =====
+       Pattern: left story column (narrates the current step) + right stage (staged SVG that reveals
+       on play/next). Keep it on a .slide.screen so it stays dark in both themes. */
+    .anim{display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:22px;align-items:stretch;}
+    .anim .story{border:1px solid var(--hairline);background:var(--panel2);padding:22px;display:flex;flex-direction:column;}
+    .anim .story .idx{font:800 11px/1 var(--mono);letter-spacing:.14em;color:var(--c4);margin-bottom:14px;}
+    .anim .story h3{margin:0 0 8px;font:600 24px/1.1 var(--serif);}
+    .anim .story p{margin:0;color:var(--tx2);font-size:15px;line-height:1.6;min-height:80px;}
+    .anim .stage{border:1px solid var(--hairline);background:var(--panel-dk);display:grid;place-items:center;padding:18px;}
+    .anim svg{width:100%;height:auto;max-height:320px;}
+    .an-node{opacity:0;transition:opacity .5s var(--ease);} .an-node.on{opacity:1;}
+    .an-edge{stroke:var(--border);stroke-width:2;opacity:0;transition:opacity .5s var(--ease);} .an-edge.on{opacity:1;stroke:var(--tx-hi);}
+    .anim-ctl{margin-top:20px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;}
+    .anim-ctl button{padding:9px 17px;border:1px solid var(--border);background:var(--panel);color:var(--tx-hi);font:700 11px/1 var(--mono);letter-spacing:.05em;border-radius:3px;cursor:pointer;}
+    .anim-ctl button.primary{background:var(--c4);color:var(--ink);border-color:var(--c4);}
+    .anim-ctl .cap{margin-left:4px;color:var(--dim);font:12px/1.4 var(--sans);}
+
+    /* toolbar + edit mode */
+    .toolbar{position:fixed;z-index:7;right:17px;top:50%;display:grid;gap:7px;transform:translateY(-50%);}
+    .toolbar button{width:33px;height:33px;border:1px solid var(--border);border-radius:50%;color:var(--paper);background:rgba(6,6,6,.88);cursor:pointer;font-size:15px;}
+    :root[data-theme="warm"] .toolbar button{color:var(--ink);background:rgba(242,238,228,.9);border-color:var(--border);}
+    .toolbar button.on{background:var(--c4);border-color:var(--c4);color:var(--ink);}
+    .edit-hint{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:8;padding:9px 18px;border:1px solid var(--c4);background:rgba(13,11,7,.95);color:var(--c4);font:700 12px/1 var(--mono);border-radius:4px;display:none;}
+    .edit-hint.show{display:block;}
+    body.editing [data-edit]{outline:1px dashed rgba(201,149,42,.5);outline-offset:3px;cursor:text;border-radius:2px;}
+
+    @media (max-width:900px){ .slide{padding-top:78px;} .grid3,.readiness,.apx-grid,.anim{grid-template-columns:1fr;} }
+    @media print{ html{scroll-snap-type:none;} .slide{page-break-after:always;} .toolbar,.edit-hint{display:none;} }
+  </style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- ============================================================
+       NAV = the mainline signpost. Set these words to YOUR mainline
+       (e.g. 是什么 · 为何好 · 现状 · 技术细节). Highlight the current
+       section per slide with class="active". DO NOT add transition
+       sentences or agenda pages — the nav IS the roadmap.
+
+       SLIDE TITLES = ASSERTIONS, not topics. Each h1/h2 is a full-sentence
+       CONCLUSION; the body is its visual EVIDENCE (not a bullet dump).
+       One idea per slide, ≤~7 elements, ≤~50 words. Open SCQA-style: pain/
+       context → question → answer up front. See references/content-logic.md.
+       ============================================================ -->
+
+  <!-- 01 COVER — hook + one-line positioning + official statement.
+       HERO CHOICE (do this per project — do NOT default to floating cards):
+         (a) type-only, below — big serif headline carries it (safe default);
+         (b) one framed REAL artifact (a screenshot / a code block / a real output);
+         (c) the cover-meta strip below tuned to the project's true facts;
+         (d) a single quiet diagram from the drawio skill.
+       Pick ONE that expresses THIS project — the cover is the first read. -->
+  <section class="slide cover">
+    <nav class="nav"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span class="active">是什么</span><span>为何好</span><span>现状</span><span>技术细节</span></div></nav>
+    <div class="frame">
+      <p class="label" data-edit>PROJECT · one-line category</p>
+      <h1 data-edit>The hook headline — the pain or the promise, in plain words.</h1>
+      <p class="lede" data-edit>说人话版:一句让外行也懂的话,点明这个项目最值钱的地方。</p>
+      <div class="official" data-edit><b>官方定位</b>:粘贴项目的权威一句话定位(从 spec/README 里找,别自己编)。</div>
+      <!-- cover-meta: replace with the project's real facts (delete if not useful) -->
+      <div class="cover-meta">
+        <div><em data-edit>领域</em><b data-edit>属于哪一类</b></div>
+        <div><em data-edit>面向</em><b data-edit>给谁用</b></div>
+        <div><em data-edit>状态</em><b data-edit>已上线 / 推进中</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 CONCEPT / "what is it" — vocabulary or the problem it solves -->
+  <section class="slide">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span class="active">是什么</span><span>为何好</span><span>现状</span><span>技术细节</span></div></nav>
+    <div class="frame">
+      <p class="label hot" data-edit>是什么 · 一分钟看懂</p>
+      <h2 data-edit>用一句话 + 几个词,把它讲清。</h2>
+      <div class="grid3">
+        <div class="card"><em data-edit>核心概念 A</em><h3 data-edit>名词 A</h3><p data-edit>一句大白话解释,<b>加粗关键点</b>。</p></div>
+        <div class="card" style="border-top-color:var(--c1)"><em data-edit>核心概念 B</em><h3 data-edit>名词 B</h3><p data-edit>一句大白话解释。</p></div>
+        <div class="card" style="border-top-color:var(--c3)"><em data-edit>核心概念 C</em><h3 data-edit>名词 C</h3><p data-edit>一句大白话解释。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 DEMO (用它) — interactive animation of THIS project's signature flow.
+       .screen keeps it dark in both themes. Replace the toy graph below with a
+       faithful, click-through mimic of the real product UI/workflow. -->
+  <section class="slide screen">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span class="active">是什么</span><span>为何好</span><span>现状</span><span>技术细节</span></div></nav>
+    <div class="frame">
+      <p class="label" data-edit>看它跑一遍 · signature workflow</p>
+      <h2 data-edit>把它的招牌流程,一步步演给你看。</h2>
+      <div class="anim" contenteditable="false">
+        <aside class="story">
+          <div class="idx"><span id="anStep">0</span> / <span id="anTot">3</span></div>
+          <h3 id="anName">就绪</h3>
+          <p id="anDesc">点「播放」看它一步步跑起来。把这段换成对当前项目真实流程每一步的解说。</p>
+        </aside>
+        <section class="stage">
+          <svg viewBox="0 0 460 240" preserveAspectRatio="xMidYMid meet">
+            <line class="an-edge" data-s="1" x1="120" y1="80" x2="220" y2="80"/>
+            <line class="an-edge" data-s="2" x1="340" y1="80" x2="340" y2="150"/>
+            <g class="an-node" data-s="0"><rect x="30" y="55" width="90" height="50" rx="6" fill="var(--panel)" stroke="var(--c5)" stroke-width="2"/><text x="75" y="85" text-anchor="middle" fill="var(--tx-hi)" font-family="var(--mono)" font-size="12">输入</text></g>
+            <g class="an-node" data-s="1"><rect x="220" y="55" width="120" height="50" rx="6" fill="var(--panel)" stroke="var(--tx-hi)" stroke-width="2"/><text x="280" y="85" text-anchor="middle" fill="var(--tx-hi)" font-family="var(--mono)" font-size="12">处理步骤</text></g>
+            <g class="an-node" data-s="2"><rect x="285" y="150" width="110" height="50" rx="6" fill="var(--panel)" stroke="var(--c3)" stroke-width="2"/><text x="340" y="180" text-anchor="middle" fill="var(--tx-hi)" font-family="var(--mono)" font-size="12">产出</text></g>
+          </svg>
+        </section>
+      </div>
+      <div class="anim-ctl" contenteditable="false">
+        <button class="primary" onclick="anPlay()">▶ 播放</button>
+        <button onclick="anNext()">下一步 ›</button>
+        <button onclick="anSet(0)">重置</button>
+        <span class="cap">单步:点「下一步」逐帧;或「播放」自动走。</span>
+      </div>
+      <p class="note-foot" data-edit><b>这就是真实运行页:</b>一句话点明它对应产品里的哪个界面/流程。</p>
+    </div>
+  </section>
+
+  <!-- 04 VALUE (为何好) — one differentiator per slide. Group under 2-3 headlines
+       via the benefit-num tag (e.g. "可用性 · ...", "质量 · ..."). Repeat this slide. -->
+  <section class="slide">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span>是什么</span><span class="active">为何好</span><span>现状</span><span>技术细节</span></div></nav>
+    <div class="frame">
+      <div class="benefit-num"><em>01</em><span data-edit>头线 · 卖点标题</span></div>
+      <h2 data-edit>一句话说清这个卖点为什么值钱。</h2>
+      <p class="lede" data-edit>展开:它解决了什么、和常规做法比好在哪。有证据就点出证据(可回溯仓库)。</p>
+      <p class="note-foot" data-edit><b>好处:</b>落到用户/团队身上的具体收益。<span style="color:var(--dim)">(技术细节见附录。)</span></p>
+    </div>
+  </section>
+
+  <!-- 05 STATUS (现状) — graded honesty: shipped / in-progress / planned -->
+  <section class="slide">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span>是什么</span><span>为何好</span><span class="active">现状</span><span>技术细节</span></div></nav>
+    <div class="frame">
+      <p class="label" data-edit>现状全景</p>
+      <h2 data-edit>已上线、推进中、规划视野,一图看清。</h2>
+      <div class="readiness">
+        <article><div class="rh">● 已上线</div><ul><li data-edit><b>真实</b>已交付的能力</li><li data-edit>再一条</li></ul></article>
+        <article><div class="rh">● 推进中</div><ul><li data-edit>正在做、还没完成的</li><li data-edit>再一条</li></ul></article>
+        <article><div class="rh">● 规划视野</div><ul><li data-edit>方向,尚未动工</li><li data-edit>再一条</li></ul></article>
+      </div>
+      <p class="note-foot" data-edit><b>诚实口径</b> · 越往右越是方向而非已交付;每一档都对应仓库里可查的真实进度,不含未经证据的数字。</p>
+    </div>
+  </section>
+
+  <!-- 06 APPENDIX divider (技术细节) — clearly separated deep-dive section -->
+  <section class="slide appendix">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span>是什么</span><span>为何好</span><span>现状</span><span class="active">技术细节</span></div></nav>
+    <div class="frame" style="text-align:center">
+      <div style="font:600 clamp(40px,6vw,78px)/1 var(--serif);letter-spacing:-.04em;margin-bottom:18px" data-edit>技术附录</div>
+      <p style="max-width:620px;margin:0 auto;color:var(--tx3);font-size:15px;line-height:1.6" data-edit>面向想深入的读者:架构、内部机制、边界。以下均可回溯真实代码。</p>
+    </div>
+  </section>
+
+  <!-- 07 APPENDIX figure — static diagram from the DRAWIO SKILL, dark/warm SVG pair -->
+  <section class="slide appendix">
+    <nav class="nav bordered"><a class="brand" href="#"><i></i> PROJECT</a><div class="nav-links"><span>是什么</span><span>为何好</span><span>现状</span><span class="active">技术细节</span></div></nav>
+    <div class="frame">
+      <p class="label" data-edit>附录 · 系统架构</p>
+      <h2 data-edit>一句话概括这张图讲什么。</h2>
+      <div class="apx-fig"><img class="fig-dark" src="fig-architecture.svg" alt="架构图"><img class="fig-warm" src="fig-architecture-warm.svg" alt="架构图"></div>
+      <div class="apx-grid">
+        <div class="apx"><b data-edit>要点一 <span class="st">已上线</span></b><p data-edit>配合图讲清的一条,<code>代码锚点</code>。</p></div>
+        <div class="apx"><b data-edit>要点二 <span class="st p">部分落地</span></b><p data-edit>另一条。</p></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toolbar">
+  <button onclick="nav(-1)" title="上一页">↑</button>
+  <button onclick="nav(1)" title="下一页">↓</button>
+  <button id="themeBtn" onclick="toggleTheme()" title="暗 / 暖 配色">☀</button>
+  <button id="editBtn" onclick="toggleEdit()" title="编辑文字">✎</button>
+  <button onclick="exportHTML()" title="导出编辑后的 HTML">⭳</button>
+  <button onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()" title="全屏">⤢</button>
+</div>
+<div class="edit-hint" id="editHint">编辑模式 · 点文字直接改,自动保存本地 · 再点 ✎ 退出 · ⭳ 导出</div>
+
+<script>
+  /* ---------- paging ---------- */
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  function cur(){var y=window.scrollY+window.innerHeight/2,i=0;slides.forEach(function(s,k){if(s.offsetTop<=y)i=k;});return i;}
+  function nav(d){var t=Math.max(0,Math.min(slides.length-1,cur()+d));slides[t].scrollIntoView({behavior:'smooth'});}
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();nav(1);}if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();nav(-1);}});
+
+  /* ---------- dark / warm theme ---------- */
+  var THEME_KEY='deck_theme';
+  function applyTheme(t){ if(t==='warm')document.documentElement.setAttribute('data-theme','warm');else document.documentElement.removeAttribute('data-theme'); var b=document.getElementById('themeBtn'); if(b)b.textContent=(t==='warm')?'🌙':'☀'; }
+  function toggleTheme(){ var c=document.documentElement.getAttribute('data-theme')==='warm'?'warm':'dark'; var n=c==='warm'?'dark':'warm'; applyTheme(n); try{localStorage.setItem(THEME_KEY,n);}catch(e){} }
+  (function(){var t;try{t=localStorage.getItem(THEME_KEY);}catch(e){}applyTheme(t==='warm'?'warm':'dark');})();
+
+  /* ---------- edit mode (click-to-edit + localStorage + export) ---------- */
+  var STORE_KEY='deck_edits';
+  var editables=[].slice.call(document.querySelectorAll('[data-edit]'));
+  function loadEdits(){var r;try{r=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){r={};}editables.forEach(function(el,i){if(r[i]!=null)el.innerHTML=r[i];});}
+  function saveEdits(){var o={};editables.forEach(function(el,i){o[i]=el.innerHTML;});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
+  function toggleEdit(){var on=document.body.classList.toggle('editing');document.getElementById('editBtn').classList.toggle('on',on);document.getElementById('editHint').classList.toggle('show',on);editables.forEach(function(el){el.contentEditable=on?'true':'false';});if(!on)saveEdits();}
+  document.addEventListener('input',function(e){if(e.target&&e.target.hasAttribute&&e.target.hasAttribute('data-edit'))saveEdits();});
+  function exportHTML(){if(document.body.classList.contains('editing'))toggleEdit();var c=document.documentElement.cloneNode(true);c.querySelectorAll('[contenteditable]').forEach(function(el){el.removeAttribute('contenteditable');});var h='<!DOCTYPE html>\n'+c.outerHTML;var b=new Blob([h],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='deck.html';a.click();}
+  loadEdits();
+
+  /* ---------- animation scaffold (adapt per project) ----------
+     anStep drives which nodes/edges are revealed. Extend STEPS with real
+     story text + reveal targets for the project's actual flow. */
+  var AN_STEPS=[
+    {name:'就绪',desc:'点「播放」看它一步步跑起来。把这段换成对真实流程每一步的解说。'},
+    {name:'第 1 步',desc:'第一步在做什么(用产品真实措辞)。'},
+    {name:'第 2 步',desc:'第二步在做什么。'},
+    {name:'产出',desc:'最终得到什么。'}
+  ];
+  var anStep=0, anTimer=null;
+  function anRender(){
+    var s=AN_STEPS[anStep];
+    document.getElementById('anStep').textContent=anStep;
+    document.getElementById('anName').textContent=s.name;
+    document.getElementById('anDesc').textContent=s.desc;
+    document.querySelectorAll('.an-node,.an-edge').forEach(function(el){
+      el.classList.toggle('on', parseInt(el.getAttribute('data-s'),10) < anStep);
+    });
+  }
+  function anStop(){ if(anTimer){clearInterval(anTimer);anTimer=null;} }
+  function anSet(n){ anStop(); anStep=Math.max(0,Math.min(AN_STEPS.length-1,n)); anRender(); }
+  function anNext(){ anStop(); if(anStep<AN_STEPS.length-1){anStep++;anRender();} }
+  function anPlay(){ anStop(); anSet(0); anTimer=setInterval(function(){ if(anStep>=AN_STEPS.length-1){anStop();return;} anStep++; anRender(); },900); }
+  anRender();
+</script>
+</body>
+</html>
