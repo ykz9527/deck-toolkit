@@ -86,7 +86,7 @@ slide_tags = re.findall(r'<section[^>]*class="[^"]*slide[^"]*"[^>]*>', s)
 slides_missing = [t for t in slide_tags if 'data-ref=' not in t]
 check(f"every slide section has data-ref ({len(slide_tags)} slides)", not slides_missing,
       f"{len(slides_missing)} slide(s) missing data-ref — the picker locates by it")
-iroots = re.findall(r'<[^>]*\bdata-(?:anim|cmp)="[^"]*"[^>]*>', s)
+iroots = re.findall(r'<[^>]*\bdata-(?:anim|cmp|interaction)="[^"]*"[^>]*>', s)
 iroots_missing = [t for t in iroots if 'data-ref=' not in t]
 check(f"every interaction root has data-ref ({len(iroots)} roots)", not iroots_missing,
       f"{len(iroots_missing)} interaction root(s) missing data-ref")
