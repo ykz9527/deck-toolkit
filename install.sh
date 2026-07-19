@@ -26,13 +26,15 @@ fan_out_one() {
   local base="$1" name="$2"
   local dest="$base/$name"
   rm -rf "$dest"
-  mkdir -p "$dest/references"
-  # 1) skill-specific payload (SKILL.md + its own references)
+  mkdir -p "$dest/references" "$dest/assets" "$dest/scripts"
+  # 1) skill-specific payload (SKILL.md + any of its own references/assets/scripts)
   cp -a "$SRC/skills/$name/." "$dest/"
-  # 2) merge shared references, then drop in shared assets + scripts
+  # 2) merge the shared core in FLAT. The trailing /. matters: it merges into
+  #    an existing dir instead of nesting (cp -a shared/assets dest/assets would
+  #    create dest/assets/assets if the skill already shipped its own assets/).
   [ -d "$SRC/shared/references" ] && cp -a "$SRC/shared/references/." "$dest/references/"
-  [ -d "$SRC/shared/assets" ]     && cp -a "$SRC/shared/assets"       "$dest/assets"
-  [ -d "$SRC/shared/scripts" ]    && cp -a "$SRC/shared/scripts"      "$dest/scripts"
+  [ -d "$SRC/shared/assets" ]     && cp -a "$SRC/shared/assets/."     "$dest/assets/"
+  [ -d "$SRC/shared/scripts" ]    && cp -a "$SRC/shared/scripts/."    "$dest/scripts/"
 }
 
 install_to() {
