@@ -2,16 +2,22 @@
 
 How the single-file deck is built. Start from `assets/deck-template.html` — it already implements everything below. This is the reference for adapting it.
 
+## The template ships holes, not designs
+
+Four things in the template are **shapes standing in for work you haven't done yet**: the cover figure, the staged-reveal stage, the compare stage, and the architecture figure. Each carries a `PLACEHOLDER-REDRAW` marker in an HTML comment, and **`verify.sh` fails while any marker remains** — so the template itself does not pass its own check, by design. A deck does.
+
+Delete a marker only once its shape is actually real for this repo. Deleting the marker without redrawing turns a silent default into a deliberate lie — the gate can force a conscious act, it can't force honesty.
+
 ## Single-file, self-contained
 
-- One `.html` file. **No external requests** — inline all CSS/JS; embed images as SVG markup or `data:` URIs. (Diagram SVGs may sit next to the file during authoring, but the shippable deliverable inlines them.)
+- One `.html` file, and it means one file: **no external requests AND no sibling assets.** Inline all CSS/JS; embed images as SVG markup or `data:` URIs. A drawio export is a *source*, not a deliverable — paste its markup into the html rather than `<img src="fig.svg">`. The deck must survive being emailed alone; `verify.sh` fails any `src=` that isn't a `data:` URI.
 - Full-viewport scroll-snap slides (`scroll-snap-type: y mandatory`, `.slide { min-height:100svh; scroll-snap-align:start }`), auto page numbers via CSS counters.
 - Build with the **Write tool** and verify after every change (`scripts/verify.sh`). Do not assemble large HTML by Python string-splicing; if you must script an edit, add an idempotency guard and back up first.
 
 ## Slide anatomy
 
 Every slide: `<section class="slide"> <nav>…</nav> <div class="frame"> …content… </div> </section>`.
-The template includes one worked example of each type: **cover, concept/vocabulary, demo (animation), value, status/readiness, appendix-divider, appendix-figure, appendix-cards**. Duplicate and fill; delete what you don't need.
+The template includes one worked example of each type: **cover (type + figure), concept/vocabulary, demo (staged-reveal animation), value, value-compare (toggle animation), status/readiness, appendix-divider, appendix-figure, appendix-cards**. Duplicate and fill; delete what you don't need — except the cover figure, the two interactions and the architecture figure, which are floors (see below).
 
 ## Dark / warm theme (how it works)
 
@@ -31,16 +37,16 @@ The +/× controls carry class `edit-ctl`, are injected only while editing, and a
 
 ## Static diagrams — required, drawio preferred, SVG fallback
 
-A deck without an architecture picture is incomplete. Every deck needs **at least a story-level architecture diagram and one appendix diagram**. Two ways to make them, in order of preference:
+A deck without an architecture picture is incomplete — `verify.sh` fails one. Every deck needs **at least a story-level architecture diagram and one appendix diagram**. Two ways to make them, in order of preference:
 
-**Preferred — the drawio skill:**
-1. Use the **drawio skill** to author a `.drawio` and export **SVG**, styled to the deck palette (dark fills, light text, earth-tone accent strokes, transparent background).
-2. For theme support, produce a **warm variant** (swap dark fills→warm, light text→ink, neutral strokes→dark; keep colored accents) and export a second SVG.
-3. Inline/reference both as a `.fig-dark` / `.fig-warm` pair inside `.apx-fig`; CSS swaps them by theme.
+**Check availability FIRST.** The drawio skill needs the drawio CLI, or an extracted AppImage + `xvfb` (headless export needs a virtual display; pure-headless segfaults). Probe it before planning around it — and if it isn't there, don't burn the task installing it, take the fallback. *Silently skipping the diagram because drawio was missing is the single most common way this step fails.*
 
-**Check availability first.** The drawio skill needs the drawio CLI, or an extracted AppImage + `xvfb` (headless export needs a virtual display; pure-headless segfaults). If that toolchain isn't set up, don't burn the whole task trying to install it.
+**Preferred — the drawio skill (when its toolchain works):**
+1. Author a `.drawio` and export **SVG**, styled to the deck palette (dark fills, light text, earth-tone accent strokes, transparent background).
+2. drawio bakes its colors, so for theme support produce a **warm variant** (dark fills→warm, light text→ink, neutral strokes→dark; keep colored accents) and export a second SVG.
+3. **Inline both markups** into `.apx-fig`, tagged `.fig-dark` / `.fig-warm`; CSS swaps them by theme. Inline, not `<img src>` — the deck ships as one file.
 
-**Fallback — hand-authored inline SVG (when drawio tooling is absent):** do NOT skip the diagram. Hand-write a clean `<svg>` in the deck palette, exactly like the animation stages — dark fills, light text (`var(--tx-hi)`), earth-tone accent strokes, mono labels, ≤~7 elements, every arrow and color carrying one clear meaning. Put it in the same `.apx-fig` slot. It won't be as polished as drawio, but a faithful hand-drawn diagram beats an unillustrated architecture every time. (Skip the warm-variant pair if hand-authoring is costly — one palette-appropriate SVG on a `.screen`-style dark panel is fine.)
+**Fallback — hand-authored inline SVG (when drawio tooling is absent):** do NOT skip the diagram. Hand-write a clean `<svg>` in the palette tokens, exactly like the animation stages — `fill="var(--panel)"`, `stroke="var(--c5)"`, text in `var(--tx-hi)`, mono labels, ≤~7 elements, every arrow and color carrying one clear meaning. Put it in the `.apx-fig` slot. **A token-driven SVG themes for free** — one copy covers dark and warm, no pair needed. It won't be as polished as drawio, but a faithful hand-drawn diagram beats an unillustrated architecture every time. The template's appendix figure ships as a worked example: copy its shape, redraw it to the real architecture.
 
 ## Animations — interaction that argues the design idea
 
@@ -48,7 +54,9 @@ The most impactful (and hardest) piece. **Design it from your repo understanding
 
 ### Step 0 — decide WHICH slides get interaction (and how many)
 
-Don't ship exactly one token demo. The floor is **2 interactive moments, aim for 3** — but chosen deliberately, never padded. A slide earns interaction only when *seeing it move* teaches something a static picture can't. Walk the mainline and ask at each candidate: **which design principle does this project live or die on, and would an interaction let the audience feel it?**
+The floor is **2 interactive moments, aim for 3**, and the template already ships two scaffolds in different forms — so the count is handled for you. Your job is not "how many" but **which moments, and is each one earned**. A slide earns interaction only when *seeing it move* teaches something a static picture can't. Walk the mainline and ask at each candidate: **which design principle does this project live or die on, and would an interaction let the audience feel it?**
+
+Because two scaffolds ship pre-wired, the failure mode shifts: it is no longer "I only built one", it is **filling both with the template's generic shapes**. A staged reveal of 输入→处理→产出, or a toggle of 手工维护 vs 单一事实源, left roughly as shipped, is not two interactions — it's zero. Both must be redrawn to *this* repo's real mechanisms.
 
 **The floor and the quality bar are both hard — and quality wins ties.** Never add an interaction just to reach the count; a hollow "for interaction's sake" demo is worse than a strong static slide. But "I only found one" is usually not a real ceiling — it's a signal you don't yet understand the repo deeply enough. Go back and read more: the real workflow code, the specs, the data model, the module that implements the differentiator. The material for a genuine second (and third) interaction almost always surfaces once you see the project clearly. Research harder before you settle for fewer.
 
@@ -69,45 +77,69 @@ For each chosen moment, go to the specs/docs/code and pull the *real* thing: the
 
 - Reproduce the real UI's layout and language: same panels, same step names, same shapes the product actually shows. Read the actual frontend/components if they exist, and match their visual grammar.
 - **Staged reveal, click-driven** is the base grammar: a left **story column** narrates the current step; a right **stage** (inline SVG) advances as steps progress. Controls: ▶ play (auto-advance), › next (one discrete step), reset.
-- **Discrete stepping is a real requirement:** "next" must advance exactly one step, not behave like play. Keep the play interval in a module-level variable and clear it (`anStop()`) at the top of next/reset/play — otherwise a lingering timer makes "next" auto-run. (The template's `anStop`/`anNext`/`anPlay` show the pattern.)
+- **Discrete stepping is a real requirement:** "next" must advance exactly one step, not behave like play. Keep the play interval **on the instance** (`a.timer`) and clear it (`anStop(a)`) at the top of next/reset/play — otherwise a lingering timer makes "next" auto-run. (The template's `anStop`/`anNext`/`anPlay` show the pattern.)
+- **Keep state per instance, never global.** Any new interaction you hand-build must scope its state and its DOM queries to its own root (`a.root.querySelectorAll(...)`, not `document.querySelectorAll(...)`) and must not introduce `id`s. Global state is what makes a second interaction silently drive the first one's nodes — `verify.sh` catches duplicate `id`s, but not a stray `document.` query.
 - **Step narration lives in the DOM, not a JS array.** The story column is an editable `<ol class="an-steps" data-editlist="anim-steps">` — one `<li>` (name + desc) per step, the active one lit. `anRender()` reads the steps from this list, so the presenter can edit/add/delete steps in edit mode and the walk-through updates live (and exports). Redraw the SVG to the real flow; node/edge reveal stays keyed on `data-s < current step`.
 
-**Pick the interaction FORM that fits the idea — don't reflex to "reveal boxes left-to-right".** A menu, roughly by what the design idea is:
+**Pick the interaction FORM that fits the idea — don't reflex to "reveal boxes left-to-right".**
 
-| The idea you're arguing | Interaction form that lands it |
-|---|---|
-| a pipeline/workflow has stages | staged reveal of nodes+edges (base grammar) — but redraw to the *real* steps |
-| "our way vs the old way" | a **toggle/slider** that flips the same stage between two states in place |
-| change here ripples to there | click a node → **highlight its downstream** lighting up along real edges |
-| structure is derived, not hardcoded | show the **source artifact** (schema/spec/config) on the left, watch the derived thing **build itself** on the right |
-| a guard/check catches something | run the happy path, then inject the bad input and watch the guard **flag it** (red state) |
-| an AI/agent loop | a **chat/side panel** that "types" the real prompt→response steps next to the artifact it produces |
-| a big graph/knowledge base | a small **pan/zoom/hover-tooltip** map with click-to-focus |
-| a complex architecture that evolved for reasons | **challenge→component progressive reveal**: start naive, pose a problem ("what at 10× load?"), reveal the piece that solves it, repeat — the audience re-lives the design (see `content-logic.md`) |
+**`assets/interaction-patterns.html` is a working gallery** — open it in a browser, try them, copy the block you want and redraw it. Everything there is written in the palette tokens and is multi-instance safe (fresh `data-*` root name per copy). It is a **palette, not a checklist**: the range exists so you can find the one that fits, not so you can use them all. The floor is 2.
 
-Combine sparingly. The richness that matters is *fidelity to the real mechanism*, not the number of widgets — one interaction that faithfully shows the thing beats three generic ones. Keep every added control wired to `anStop()` discipline so stepping stays discrete.
+**There are only six machines.** The dozen-odd "forms" are those six × different rhetorical uses, plus a few compositions. This matters when you build a bespoke interaction: **the unit you copy is a machine; the unit you choose is a rhetorical move.** Learn six things, not fourteen.
+
+| Machine | How it moves | The moves it supports |
+|---|---|---|
+| **M1 step through a sequence** | a step index; `data-s <= step` lights up. *Always* `clearInterval` at the top of next/play/reset or "next" auto-runs | **staged reveal** (the workflow has stages) · **challenge→component** (nothing here is arbitrary — start naive, pose the challenge, let it break, reveal the fix, repeat; the AWS re:Invent move) · **agent panel** (the AI loop is real — prompt types itself beside the artifact it builds) |
+| **M2 select one of N states** | click → move `.on` to the matching `[data-k]` group. One implementation, `.cmp` — in the template | **compare toggle** at 2 tabs (*ours beats the old way*) and **lens switcher** at N tabs (*several views, all true at once*) are the **same code**. Two craft knobs: tab count, and what you leave *outside* the swapping groups — for a lens, keep the **nodes outside** so only edges change; that fixed skeleton is the entire argument |
+| **M3 click an element → its payload** | click `[data-x]` → show the matching payload. Same shape as M2; the trigger is *in the picture* | by payload: **details-on-demand** (a sentence) · **code-anchored inspect** (real code + `file:line` — for a traceability project this *performs* the honesty claim in three seconds) · **StretchText** (an inline gloss — the release valve for "keep the project's own words, gloss don't replace") · **C4 zoom** (a whole other diagram; the only one that adds navigation state — a stack + breadcrumb. "Like Google Maps", and never descend to code level) |
+| **M4 continuous parameter** | `range` input → recompute and redraw | **parameter dial** (*it holds up as X grows — and here's where it stops*; let them drag to 10× instead of asserting it). Bind it to **time** and the same widget is a **history scrubber** |
+| **M5 traverse a graph** | click a node → BFS along real edges → light downstream in waves | **ripple-on-click** (*change here, it reaches there*). **The only machine that computes** — everything else swaps between states you laid out in advance. That's why it can't merge into M2 |
+| **M6 commit, then reveal** | lock every option, then show the truth. One-shot by design | **predict-then-reveal** (*your intuition is wrong, and the gap is the point*). **Once per deck**, real number only |
+
+**Machines compose — reach for that before inventing a seventh.** The gallery's *guard catches bad input* (`it refuses what it can't verify` — run the happy path, then inject the bad input and watch it go red) is not a new machine: it is **M2 picking a branch + M1 playing a timed script**. Most "new forms" turn out to be assemblies.
+
+**One thing there is a rendering, not a machine:** *unit visualization* (`this is how much there is, and how little is covered` — one mark per **real** thing; the gap is the argument and the unmarked dots are the honest roadmap). Its interaction is just M2's toggle; the power is entirely in the drawing. One mark = one thing, never "a dot ≈ 5 files".
+
+Combine sparingly. The richness that matters is *fidelity to the real mechanism*, not the number of widgets — one interaction that faithfully shows the thing beats three generic ones. Distill's own warning holds: *not everything needs to be interactive; misapplied interactivity wastes effort.* Keep every added control wired to the `anStop()` discipline so stepping stays discrete.
 
 ### Step 3 — keep it honest and on a dark screen
 
 - Put the animation slide on `.slide.screen` (stays dark in both themes).
 - Only animate what's real. If a step is aspirational, either omit it or mark it. Don't imply a capability the product doesn't have.
 
-### The scaffold
+### The scaffolds — two forms ship, because the floor is two
 
-`assets/deck-template.html` ships a minimal working scaffold: the editable `.an-steps` list (name + desc per step) driving `.an-node[data-s]` / `.an-edge[data-s]` reveal, with play/next/reset wired correctly. Add/edit steps in the list and redraw the SVG to match the project's real flow. For a rich product UI, expect this to grow into a bespoke SVG scene — that's expected; the scaffold is the starting grammar, not the ceiling.
+`assets/deck-template.html` ships **two working interactions, in deliberately different grammars**, so the floor is structural rather than a thing you have to remember:
 
-## Light dynamic touch — reveal-on-view (cheap, tasteful)
+| In the template | Form | Root attribute |
+|---|---|---|
+| the signature-workflow demo | **staged reveal** — editable `.an-steps` list drives `.an-node[data-s]` / `.an-edge[data-s]`, with play/next/reset wired | `.anim[data-anim="flow"]` + `.anim-ctl[data-anim-for="flow"]` |
+| the "why it's better" slide | **compare toggle** — flips one stage between two states in place (`.cmp-view[data-k]` + `.cmp-cap[data-k]`) | `.cmp[data-cmp="way"]` |
 
-Beyond the 2–3 hand-built interactions, a *subtle* way to add life is to let a diagram's parts fade/rise in as its slide scrolls into view. Best spent on a diagram that **argues a value prop** — e.g. a "define once → derives everywhere" fan-out whose outputs appear one by one *shows* the claim instead of stating it.
+Both are **multi-instance by construction**: every instance keys off its own root attribute and holds its own step/timer state — nothing is global, and there are no `id`s to collide. **To add a third interaction, copy the whole `<section>` and give the copy a new `data-anim` / `data-cmp` name** (plus a matching `data-anim-for` and a fresh `data-editlist` name). It just works; verify it with `verify.sh`.
 
-- Add a `reveal` class to the container; its direct children start hidden and stagger in via `nth-child` `transition-delay`.
-- **Gate the hidden state on `body.js`** (JS adds the class) so no-JS, print, and `prefers-reduced-motion` render everything visible — never hide content behind an effect.
-- Drive it with one `IntersectionObserver` that toggles a `seen` class on entry (and off on exit, so it replays). Keep it restrained: no buttons, no bounce — just a quiet build-in that reinforces the slide's point.
+Redraw both SVGs to the project's real flow and real mechanism — the shipped ones are shapes, not answers. For a rich product UI, expect a scaffold to grow into a bespoke SVG scene; that's expected, the scaffolds are the starting grammar, not the ceiling. **A bespoke interaction that uses neither root attribute should carry `data-interaction="name"`** so it still counts toward the floor in `verify.sh`.
+
+## Light dynamic touch — reveal-on-view (already in the template)
+
+Beyond the 2–3 hand-built interactions, a *subtle* way to add life is to let a container's parts fade/rise in as its slide scrolls into view. **This ships wired up: add `class="reveal"` to any container and its direct children stagger in.** (The template puts it on the concept grid; move or reuse it freely.)
+
+It does not count toward the interaction floor — it's decoration that happens to be tasteful, not an argument. Best spent where the staggering itself *is* the point: a "define once → derives everywhere" fan-out whose outputs appear one by one *shows* the claim instead of stating it. Everywhere else it's noise; don't sprinkle it.
+
+How it's built, if you need to change it: children start hidden and stagger via `nth-child` `transition-delay`; the hidden state is gated on `body.js` so no-JS, print and `prefers-reduced-motion` render everything visible (never hide content behind an effect); one `IntersectionObserver` toggles a `seen` class on entry and off on exit, so it replays.
 
 ## Output location & preview
 
-Build the deck to **`showcase_deck/index.html` in the project root** (create the folder). Keep any drawio SVG figures beside it in the same folder — the deck references them by relative path (`fig-architecture.svg`, `fig-architecture-warm.svg`), and serving the folder resolves them. One project = one `showcase_deck/`; when improving an existing deck, it already lives here.
+Build the deck to **`showcase_deck/index.html` in the project root** (create the folder). One project = one `showcase_deck/`; when improving an existing deck, it already lives here. Working files (a `.drawio` source, an exported `.svg` before you inline it) may sit in the folder during authoring, but `index.html` must not depend on them — it ships alone.
 
 ## Self-check, then serve (always)
 
-Run `scripts/verify.sh showcase_deck/index.html`: balanced tags, no external URLs, both themes wired, `data-edit` present, animation controls present. Then **always** launch the preview — `scripts/serve.sh` (no-arg defaults to `showcase_deck/index.html`, binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.
+Run `scripts/verify.sh` (no-arg defaults to `showcase_deck/index.html`). It is not just a linter — it enforces the delivery floors, so a deck that under-delivers fails:
+
+- **structure** — balanced tags, balanced CSS braces, ≥3 slides, nav present, **no duplicate `id`s** (the classic copy-paste break).
+- **single file** — no external http(s) assets, **no sibling asset files** (any `src=` that isn't `data:`), no external stylesheet.
+- **delivery floors** — themes wired, edit mode + `data-editlist` wired, **≥2 interaction roots**, animation controls present, **architecture diagram present**, **cover figure present**, **zero `PLACEHOLDER-REDRAW` markers left**.
+
+A FAIL on the floors is not a formality to route around: it means the deck isn't finished. But fix it by *understanding the repo better*, never by padding — see Step 0 above.
+
+Then **always** launch the preview — `scripts/serve.sh` (no-arg defaults to `showcase_deck/index.html`, binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.

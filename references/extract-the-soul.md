@@ -30,8 +30,9 @@ STATUS (graded, evidenced):
   shipped:   [capability] — evidence: [test/file/route]
   partial:   [capability] — evidence + what's missing
   planned:   [direction]  — evidence it's only a design doc / intent
-SCOPE ANTI-GOALS: what this project is deliberately NOT (prevents overclaiming).
 ```
+
+Every field feeds something concrete: positioning → the cover, signature workflow → the first interaction, vocabulary → the allow-list for every slide, status → the readiness slide. If a field you're tempted to add feeds nothing, don't add it.
 
 ## Speak the project's own language (non-negotiable)
 

@@ -68,11 +68,6 @@ When a slide has to justify *why this design* (a schema, a datastore, an archite
 3. **High-level design** — the macro data flow, agreed before detail.
 4. **Deep dive + trade-offs** — and explicitly say **what you gave up and why**.
 
-## Credibility moves worth a dedicated slide
-
-- **Goals & Non-Goals** — before the architecture, one slide stating what the system deliberately does NOT do. Pre-empts "but what about X?" derailment and reads as maturity.
-- **Alternatives & abandoned ideas** — a late slide showing designs you rejected and *why* (I/O bottleneck, maintenance cost). Showing the roads not taken makes the chosen one authoritative, not lucky. (These map straight from a repo's RFC/ADR/design docs — mine them in `extract-the-soul.md`.)
-
 ## Progressive reveal — teach a complex picture as a chain of micro-problems
 
 Don't drop a finished mega-diagram at once. Start minimal, then **"introduce a challenge → add the component that solves it"**, step by step: show the naive design → "what happens at 10× load?" → reveal the scaling piece → "and if the primary dies?" → reveal failover. The audience re-lives the design's evolution instead of decoding a static result. This is exactly what the interactive animation (`deck-mechanics.md`) is for — challenge-driven staging, not a passive left-to-right pipeline.

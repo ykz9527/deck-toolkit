@@ -2,19 +2,32 @@
 
 A project deck fails the moment the listener can't answer "what line is this taking me down?". Decide the mainline before building, and make it visible through the nav.
 
-## Pick one through-line
+## Derive the through-line — don't pick one off a shelf
 
-Choose a spine that fits the project and audience. Proven options:
+**The mainline is an output, not a menu choice.** Before any HTML, ask SCQA of *this* repo and let the answers set the sections:
 
-| Spine | When it fits |
+- **Situation** — the baseline this audience already accepts, uncontested. ("Extracting the *why* behind a codebase means reading it by hand today.")
+- **Complication** — what breaks that baseline: the pain, the pressure, the risk. This is where the tension comes from. ("That knowledge lives in people's heads and evaporates when they leave.")
+- **Question** — the crisp problem the complication forces. ("How does a codebase remember its own design rationale?")
+- **Answer** — the top-level conclusion, stated **up front**, details after. ("It extracts them into a graph bound to real code.")
+
+That's top-down on purpose: it forces the conclusion out before the internals, which is the whole reason the audience keeps listening. The spine is then the shortest path that walks S→C→Q→A and then earns it — typically `pain → what → see it → why → status → detail`, but **the project decides**, not the template.
+
+Then compress the spine into **4–6 terse nav words that read as a line**. Those words are the deck's only signpost, and they live in ONE place — the `MAINLINE` array at the top of the template's script. Change them there and every slide follows; each slide declares its section with `data-sec` and the active word lights up on its own. There is no reason to keep the template's `是什么 · 为何好 · 现状 · 技术细节` — that is one project's answer, shipped as an example.
+
+**The test:** can a listener repeat the spine back after one pass? If not, simplify it.
+
+Worked examples of what a derivation *produces* (recognise the shape, don't shop from it):
+
+| Spine it produced | The situation that produced it |
 |-------|--------------|
-| `问题 → 是什么 → 看它用 → 为何好 → 现状 → 细节` | pain is relatable; show-then-tell; the default for most tools |
-| `是什么 → 为何好 → 怎么工作 → 现状` | leadership wants the value case before the demo |
-| `用它 / 扩它`(two user journeys) | product has a clear "use it" and "extend it" split |
+| `问题 → 是什么 → 看它用 → 为何好 → 现状 → 细节` | pain is relatable and the complication does the selling; show-then-tell |
+| `是什么 → 为何好 → 怎么工作 → 现状` | leadership already feels the pain — the answer is the hook, so lead with it |
+| `用它 / 扩它`(two user journeys) | the complication differs by audience: users hit one wall, extenders another |
 
-The test: can a listener repeat the spine back after one pass? If not, simplify it.
+If none of the three fits, that is expected and fine — write the one your SCQA actually produced.
 
-**Open with SCQA.** Whatever spine you pick, shape the *opening* as Situation → Complication → Question → Answer: establish the shared baseline, show what breaks it (the pain), frame the question, then give the top-level answer **up front** — don't make the audience wait through architecture to learn what the thing does. Hit the point in the first slide, not five in. (Per-slide content logic — assertion-evidence titles, Rule of One, C4 layering — lives in `content-logic.md`.)
+(Per-slide content logic — assertion-evidence titles, Rule of One, C4 layering — lives in `content-logic.md`.)
 
 **Show, then name.** Put a concrete demo/animation *before* abstract vocabulary — people believe what they see run, then accept the words for it. (In practice: the signature-workflow animation often comes early, right after the hook.)
 
@@ -23,7 +36,7 @@ The test: can a listener repeat the spine back after one pass? If not, simplify 
 The single strongest, lowest-clutter signpost is the **top nav**: make its words read as the mainline, and highlight the current section on every slide.
 
 - Nav words ARE the roadmap: e.g. `是什么 · 为何好 · 现状 · 技术细节` reads as "what → why good → where it's at → how it's done".
-- Keep 4–6 sections, terse. Highlight the active one per slide with `class="active"`.
+- Keep 4–6 sections, terse. Define them once in the template's `MAINLINE` array; each slide names its section via `data-sec` and the highlight is automatic — never hand-maintain `class="active"` across slides.
 - Group slides under these sections; keep the order monotonic (never jump backward through the nav).
 
 ## The anti-clutter rule (learned the hard way)
