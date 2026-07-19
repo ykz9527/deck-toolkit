@@ -22,15 +22,17 @@
 
   document.addEventListener('mousemove', function (e){
     if (!picking) return;
+    if (inUI(e.target)){ hl.style.display = 'none'; return; }
     var t = refEl(e.target) || e.target;
-    if (!t || t === btn || t === toast){ hl.style.display = 'none'; return; }
+    if (!t){ hl.style.display = 'none'; return; }
     var r = t.getBoundingClientRect();
     hl.style.display = 'block'; hl.style.left = r.left + 'px'; hl.style.top = r.top + 'px';
     hl.style.width = r.width + 'px'; hl.style.height = r.height + 'px';
   }, true);
 
+  function inUI(el){ return el === btn || el === toast || (el && el.closest && !!el.closest('#__deckPickerBox')); }
   document.addEventListener('click', function (e){
-    if (!picking || e.target === btn) return;
+    if (!picking || inUI(e.target)) return;  // never intercept clicks on our own UI (button / copy box)
     e.preventDefault(); e.stopPropagation();
     var t = refEl(e.target) || e.target;
     if (!e.shiftKey) selected = [];
@@ -60,13 +62,28 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, function (){ manual(text); });
     else manual(text);
   }
+  // Insecure-context fallback (LAN http has no navigator.clipboard, so this is the
+  // NORMAL path). Reuse ONE box so multi-select just refreshes it; close via the ✕
+  // button. Clicks inside it are ignored by the pick handlers (inUI), so picking can
+  // stay on for further shift-clicks.
   function manual(text){
-    var box = document.createElement('textarea');
-    box.value = text;
-    box.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;width:80vw;height:40vh;font:12px monospace;padding:8px';
-    document.body.appendChild(box); box.focus(); box.select();
-    show('非 https 无法自动复制:手动 Ctrl/Cmd+C,再点空白关闭');
-    var close = function (ev){ if (ev.target !== box){ box.remove(); document.removeEventListener('click', close, true); } };
-    setTimeout(function (){ document.addEventListener('click', close, true); }, 300);
+    var box = document.getElementById('__deckPickerBox');
+    if (!box){
+      box = document.createElement('div'); box.id = '__deckPickerBox';
+      box.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;width:80vw;max-width:720px;background:#111;border:1px solid #444;border-radius:6px;padding:10px;box-shadow:0 8px 40px rgba(0,0,0,.5)';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin:0 0 6px;font:12px system-ui;color:#ccc';
+      var lbl = document.createElement('span'); lbl.textContent = '手动复制:框内 Ctrl/Cmd+C';
+      var x = document.createElement('button'); x.textContent = '✕';
+      x.style.cssText = 'font:600 13px system-ui;background:#333;color:#fff;border:1px solid #555;border-radius:4px;cursor:pointer;padding:2px 9px';
+      x.addEventListener('click', function (e){ e.stopPropagation(); box.remove(); });
+      var ta = document.createElement('textarea'); ta.id = '__deckPickerText';
+      ta.style.cssText = 'width:100%;height:38vh;box-sizing:border-box;font:12px monospace;padding:8px;background:#0b0b0b;color:#eee;border:1px solid #333';
+      bar.appendChild(lbl); bar.appendChild(x); box.appendChild(bar); box.appendChild(ta);
+      document.body.appendChild(box);
+    }
+    var t = box.querySelector('#__deckPickerText');
+    t.value = text; t.focus(); t.select();
+    show('非 https 无法自动复制:框内 Ctrl/Cmd+C,右上 ✕ 关闭');
   }
 })();
