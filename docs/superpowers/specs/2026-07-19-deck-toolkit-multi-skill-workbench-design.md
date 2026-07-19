@@ -20,12 +20,17 @@
 ## 2. 非目标(明确不做)
 
 - **HTML → 传统 pptx 转换**:已否决。这个 deck 的灵魂是交互与动画,转静态 pptx 等于丢魂,不值当。
-- **多后端适配层(Claude Code / OpenCode / 裸 API 可插)**:本轮不做。先做 **B 形态**(后端就是当前 Claude Code 对话),验证"指哪改哪"效果好之后,后续再扩到 C(薄适配层)。
+- **独立 App / 工作台 / 多后端适配层**:不做。打磨能力**不是一个要单独跑和管理的项目**——它就是一个 skill + serve 模式里一个可选的"点一下拷贝"小助手,后端始终是**你正在用的这个 Claude Code 对话**。验证 L2 效果好之后,后续再考虑扩到独立面板 + 多后端(OpenCode / 裸 API)。
 - **重型 PDF 解析栈**:不引入。PDF 让 Claude 用 Read 工具原生读,配一个轻量导图脚本即可。
 
 ## 3. 设计理念(一句话)
 
-> 把"和 AI 反复调 PPT"这件事,从聊天框里的**盲改**,变成"**所见即所选、指哪改哪**"的工作台;并让底座(模板/视觉/交互/校验)一份复用,内容源(代码仓/论文)各写各的魂。
+> 把"和 AI 反复调 PPT"这件事,从聊天框里的**盲改**,变成"**点一下你要改的元素、张嘴说、它就改准**"——依然全程在你原有的 Claude Code 对话里,没有第二个 app、没有独立工作台;底座(模板/视觉/交互/校验)一份复用,内容源(代码仓/论文)各写各的魂。
+
+**关于"会不会变重"——两个层次分清楚:**
+
+1. **项目怎么打包(多 skill 仓)= 只是我维护源码的组织方式,不给用户添负担。** 用户侧和现在一样:`install.sh` 一把装好,得到几个 skill,然后就是跟自己的 Claude Code 说话。没有"要跑一个项目"这回事。
+2. **打磨能力 = 一个 skill + serve 模式里的可选"点选拷贝"小助手(L2 形态),不是独立 App。** 唯一运行时是 `serve.sh`(现在就有),后端是当前对话的 Claude。"点选"只是你正在看的 deck 网页上点一下元素、把引用拷到剪贴板,粘回你本来就在用的聊天框——省掉手打 id 的麻烦,不引入任何新东西要管理。
 
 ## 4. 总体架构
 
@@ -35,7 +40,7 @@
 deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 ├─ shared/                           ← 唯一事实源:底座(不重复)
 │   ├─ assets/
-│   │   ├─ deck-template.html        ← 模板(含 data-ref 预埋 + 框选层)
+│   │   ├─ deck-template.html        ← 模板(含 data-ref 预埋 + 点选拷贝助手)
 │   │   └─ interaction-patterns.html ← 六台机器交互库
 │   ├─ references/
 │   │   ├─ visual-system.md
@@ -52,7 +57,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 │   ├─ paper-deck/                   ← 论文 → deck(新)
 │   │   ├─ SKILL.md
 │   │   └─ references/{extract-the-paper-soul, paper-narrative}.md
-│   └─ deck-workbench/               ← 框选→引用→改→热更新(新,跨两种 deck 通用)
+│   └─ deck-editing/                 ← 在已生成 deck 上精确迭代改(新,跨两种 deck 通用)
 │       ├─ SKILL.md
 │       └─ references/edit-loop.md
 ├─ install.sh                        ← 底座扇出 + 双平台安装
@@ -68,8 +73,8 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 从现有 skill 抽出与"内容源无关"的部分:模板、视觉系统、交互库、`deck-mechanics.md`、`content-logic.md`、`verify.sh`、`serve.sh`。这些东西讲代码仓和讲论文都一样用。
 
 **模板改动(相对现有):**
-- **预埋 `data-ref`**:每个"可被框选/编辑的语义单元"(幻灯片 section、标题、正文块、交互根、图)在生成时打上稳定的 `data-ref="s3-demo"` 这类 id。这是框选精确定位的地基(见 §6)。
-- **框选层**:模板内置一个轻量 JS overlay(类似现有 edit mode,一个 toggle 开关):hover 高亮 DOM 节点、点选(shift 多选)、把选中项打包成"引用块"复制到剪贴板。纯前端、只读,不写文件。
+- **预埋 `data-ref`**:每个"可被点选/编辑的语义单元"(幻灯片 section、标题、正文块、交互根、图)在生成时打上稳定的 `data-ref="s3-demo"` 这类 id。这是精确定位的地基(见 §6)——**这是打磨能力真正的核心**,有了它 Claude 才能一击命中要改的地方。
+- **点选拷贝小助手(可选,L2)**:模板内置一个轻量 JS overlay(类似现有 edit mode,一个 toggle 开关):hover 高亮 DOM 节点、点选(shift 多选)、把选中项打包成"引用块"复制到剪贴板。纯前端、只读,不写文件。它**只是省掉你手打 id 的麻烦**;不开它、纯用 data-ref 靠说话定位也能工作。
 
 ### 5.2 `showcase-deck`(代码仓 → deck,瘦身)
 
@@ -88,30 +93,30 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 - **核心方法图/流程图 → 重画成交互**:讲论文的高光就是"方法怎么 work",用底座的六台机器做成一步步演的交互。天然满足交互底线(≥2)。
 - **结果曲线/复杂实验图 → 抽原图**:重画不划算也易失真,用 `shared/scripts/extract-pdf-figures.sh` 把论文原图导成 png 内联进 deck,最忠实。
 
-### 5.4 `deck-workbench`(框选编辑回路,新 — 本轮核心)
+### 5.4 `deck-editing`(在已生成 deck 上精确迭代改,新 — 本轮核心)
 
-一份 reference `edit-loop.md`,教 Claude 如何消费"引用块"做外科手术式编辑。这是 B 形态的落地:**没有后端适配层,后端就是当前 Claude Code 对话**。
+一个 skill(不是 App),一份 reference `edit-loop.md`,教 Claude 如何消费"引用块"做外科手术式编辑。落地形态:**没有后端适配层,后端就是当前 Claude Code 对话**;用户全程只跟原有的 Claude 说话。
 
 **支持两类操作:**
-- **区域级改**:消费框选生成的引用块(见 §6),grep `data-ref` 唯一定位,只改那一处,verify + 热更新。
+- **区域级改**:消费点选拷贝的引用块(见 §6),grep `data-ref` 唯一定位,只改那一处,verify + 热更新。歧义时也支持纯说话("改 s3 那个对比图"),因为 data-ref 是人能看懂的。
 - **结构级改**:加页/删页/重排/换主线。提供一个"结构地图"能力(`serve` 或一个小脚本 dump 出 `幻灯片序号 → data-ref → nav 标签 → 标题` 的清单),让人和 Claude 有共同的地图去指"把第 5 页移到第 2 页后面"。主线仍是模板里 `MAINLINE` 数组一处改。
 
-## 6. 关键机制:框选 → 引用 → 改 → 热更新(B 的数据流)
+## 6. 关键机制:点选 → 引用 → 改 → 热更新(L2 数据流)
 
-这是本轮技术核心。因为 B 没有后端写文件,**浏览器只读、Claude 才写**,所以框选层必须吐出足够精确的引用,让 Claude 光靠读 `index.html` 就能唯一定位。
+这是本轮技术核心。因为没有后端写文件,**浏览器只读、Claude 才写**,所以点选拷贝的引用必须足够精确,让 Claude 光靠读 `index.html` 就能唯一定位。整条链路全在用户原有的 Claude Code 对话里完成,没有第二个 app。
 
 **粒度:点选元素(A)。** hover 高亮 DOM 节点,点一下选中(shift 多选)。每个选中项 = 一个确定的 DOM 节点,而非模糊矩形。
 
-**定位:预埋 `data-ref`(路2)。** 生成阶段就给每个可选语义单元打稳定 id,框选直接读它 → 100% 唯一命中。不靠"文本 grep 靠猜"。
+**定位:预埋 `data-ref`(路2)。** 生成阶段就给每个可选语义单元打稳定 id,点选直接读它 → 100% 唯一命中。不靠"文本 grep 靠猜"。这是**打磨能力真正的地基**;点选助手只是它上面的便利层。
 
 **数据流:**
 
 ```
-①用户在浏览器开 workbench 模式(toggle)
+①用户在浏览器开点选模式(deck 里一个 toggle,可选;不开就纯说话)
       ↓
 ②hover 高亮 → 点选一个/多个 DOM 节点(每个都有 data-ref)
       ↓
-③框选层打包成"引用块" → 复制到剪贴板:
+③小助手打包成"引用块" → 复制到剪贴板:
       📍 第 3 页 · [为何好] · 「单一事实源省掉了手工同步」
       🎯 选中:一个 compare 切换交互
       🔑 data-ref="s3-source-of-truth"        ← Claude 用这个 grep,唯一命中
@@ -120,7 +125,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
       ↓
 ④用户粘回 Claude Code 聊天框,补上指令
       ↓
-⑤Claude 按 deck-workbench/edit-loop.md:
+⑤Claude 按 deck-editing/edit-loop.md:
       grep data-ref="s3-source-of-truth" → 唯一定位 → 外科手术式改 → verify.sh
       ↓
 ⑥serve 热更新 → 浏览器自动刷新,看到结果 → 不满意回 ②
@@ -139,20 +144,20 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 
 ## 8. 错误处理与边界
 
-- **框选到没有 data-ref 的元素**(比如手工加的老内容):框选层回退到"页码 + outerHTML + 最近的祖先 data-ref",引用块标注"⚠️ 无稳定 id,Claude 需读上下文确认";并建议 Claude 顺手补一个 data-ref。
+- **点选到没有 data-ref 的元素**(比如手工加的老内容):小助手回退到"页码 + outerHTML + 最近的祖先 data-ref",引用块标注"⚠️ 无稳定 id,Claude 需读上下文确认";并建议 Claude 顺手补一个 data-ref。
 - **多选跨页**:引用块按页分组,每页一段,避免 Claude 混淆。
 - **verify 失败**:编辑回路必须在改完后跑 `verify.sh`,FAIL 则回滚(编辑前 `cp` 备份),不把坏页热更新给用户。
-- **热更新轮询**:仅在 workbench/serve 模式注入,产出的最终单文件 deck **不含**轮询脚本和框选层(保持"单文件、可邮寄"的交付底线)——即区分"工作态"与"交付态"。
+- **热更新轮询**:仅在 serve 模式注入,产出的最终单文件 deck **不含**轮询脚本和点选助手(保持"单文件、可邮寄"的交付底线)——即区分"工作态"与"交付态"。
 
 ## 9. 交付态 vs 工作态(重要)
 
-- **工作态**:带 data-ref、框选层、热更新脚本,供打磨。
-- **交付态**:`verify.sh` 仍要求单文件、无外部请求。**data-ref 可以保留**(无害,且未来 C 形态要用);**框选层 JS 和热更新轮询必须能一键剥离**(一个 `build-deliverable` 小脚本或模板里以注释包裹的可移除块),保证交付的 deck 干净、能邮寄。
+- **工作态**:带 data-ref、点选助手、热更新脚本,供打磨。
+- **交付态**:`verify.sh` 仍要求单文件、无外部请求。**data-ref 可以保留**(无害,且未来扩展要用);**点选助手 JS 和热更新轮询必须能一键剥离**(一个 `build-deliverable` 小脚本或模板里以注释包裹的可移除块),保证交付的 deck 干净、能邮寄。
 
 ## 10. 测试与验证
 
-- `verify.sh` 扩展:新增 "data-ref 覆盖率" 检查(关键语义单元是否都有 id);"交付态无框选/热更新残留" 检查。
-- **真跑用户路径**(项目铁律):装好后,分别用一个真实代码仓、一篇真实论文 PDF 各跑一遍完整链路(生成 → 框选 → 粘引用 → Claude 改 → 热更新看到变化),而不是只跑脚本。
+- `verify.sh` 扩展:新增 "data-ref 覆盖率" 检查(关键语义单元是否都有 id);"交付态无点选助手/热更新残留" 检查。
+- **真跑用户路径**(项目铁律):装好后,分别用一个真实代码仓、一篇真实论文 PDF 各跑一遍完整链路(生成 → 点选 → 粘引用 → Claude 改 → 热更新看到变化),而不是只跑脚本。
 - 两个主题(暗/暖)都要肉眼验。
 
 ## 11. 分期与依赖
@@ -160,7 +165,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 建议实现顺序(每期可独立验收):
 
 1. **P0 — 仓库重构 + 底座抽取 + install 扇出。** 把现有 skill 拆成 `shared/` + `showcase-deck/`,`install.sh` 改扇出。验收:装好后 `showcase-deck` 行为与现在完全一致(零回归)。
-2. **P1 — 模板加 data-ref + 框选层 + serve 热更新 + deck-workbench skill。** 验收:能框选、拿到引用块、Claude 据此改、页面自动刷新。
+2. **P1 — 模板加 data-ref + 点选拷贝助手 + serve 热更新 + deck-editing skill。** 验收:能点选、拿到引用块、Claude 据此改、页面自动刷新。data-ref 是核心,点选助手是其上便利层。
 3. **P2 — paper-deck skill + 导图脚本。** 验收:一篇真实论文跑通生成 + 方法图交互 + 结果图抽原图。
 4. **P3(本轮不做,留接口)** — C 形态:后端适配层(OpenCode / 裸 API)。
 
