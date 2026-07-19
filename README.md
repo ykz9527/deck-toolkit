@@ -1,16 +1,28 @@
-# project-showcase-deck
+# deck-toolkit
 
-**Turn any code repository into a polished, single-file HTML slide deck that introduces the project to a human audience — leadership and newcomers — not a README, not docs, but a narrated showcase you can present or share.**
+**A multi-skill toolkit that generates and polishes narrated, single-file HTML slide decks — turning a code repository (and, soon, a paper PDF) into a showcase you can present to a human audience, not a README, not docs.**
 
-> 一个 Claude Code / Codex skill:把任意代码仓库变成一份**单文件 HTML 讲演稿**(暗/暖主题、可点击编辑、内置交互动画),用来给领导和新人介绍项目。
+> 一个 Claude Code / Codex skill 工具集:从**代码仓**或**论文 PDF** 生成单文件 HTML 讲解 deck(暗/暖主题、可点击编辑、内置交互动画),并支持在生成后与 AI 持续迭代打磨。
 
 `Works in Claude Code and Codex` · `single self-contained .html` · `dark + warm theme` · `MIT`
 
 <p align="center">
-  <img src="assets/img/sample-deck.svg" alt="Three slides a generated deck produces: a type-led cover, a live interactive demo on a dark screen, and a warm-theme value slide" width="100%">
+  <img src="shared/assets/img/sample-deck.svg" alt="Three slides a generated deck produces: a type-led cover, a live interactive demo on a dark screen, and a warm-theme value slide" width="100%">
 </p>
 
 The output is **one `.html` file** — no build step, no external requests, no sibling assets, no server. Open it, present it, email it. Every deck carries a dark/warm theme toggle, click-to-edit mode, and 2–3 hand-built interactive demos that mimic the project's own signature workflow.
+
+---
+
+## Source layout
+
+This repo holds the *source* for a growing family of deck skills, not a single flat skill folder:
+
+- `shared/` — the base every skill draws on: template, visual system, interaction library, and the `verify.sh` / `serve.sh` scripts. Single source of truth, shared by all skills.
+- `skills/showcase-deck/` — code repo → deck (extract the project's soul + build the SCQA mainline). The one skill shipped today.
+- *(P1/P2 will add `skills/paper-deck/` and `skills/deck-editing/`.)*
+
+`install.sh` fans `shared/` + each `skills/<name>/` out into a flat, self-contained directory per skill — see [Install](#install) and [Layout](#layout) below.
 
 ---
 
@@ -36,7 +48,7 @@ The visual system is solved once by the shipped template, so you spend your effo
 The skill walks the agent through six steps — from reading the repo to serving the finished page:
 
 <p align="center">
-  <img src="assets/img/workflow.svg" alt="Six steps: extract soul, design mainline, fill template, build interactions, static diagrams, verify and serve" width="100%">
+  <img src="shared/assets/img/workflow.svg" alt="Six steps: extract soul, design mainline, fill template, build interactions, static diagrams, verify and serve" width="100%">
 </p>
 
 1. **Extract the soul** — read the repo's own docs, then code / architecture / git / tests; write a Project Brief with a vocabulary allow-list mined verbatim.
@@ -50,30 +62,24 @@ The skill walks the agent through six steps — from reading the repo to serving
 
 ## Install
 
-The skill is a directory under your agent's personal-skills folder. Cloning it there *is* the install — and lets `git pull` keep it current.
-
-**One-liner — Claude Code:**
+Clone this repo anywhere (it is *not* itself a skill folder), then run the installer. `install.sh` reads the local `shared/` + `skills/` source and fans each skill out into your agent's personal-skills folder(s) — auto-detecting Claude Code and/or Codex, installing to both if both are present:
 
 ```bash
-git clone https://github.com/ykz9527/project-showcase-deck.git ~/.claude/skills/project-showcase-deck
+git clone https://github.com/ykz9527/project-showcase-deck.git deck-toolkit
+cd deck-toolkit && bash install.sh
 ```
 
-**One-liner — Codex** (same files, different folder — see below):
+This installs `showcase-deck` (and any future skills under `skills/`) as self-contained, flat directories:
+
+- Claude Code → `~/.claude/skills/showcase-deck`
+- Codex → `~/.agents/skills/showcase-deck`
+
+Force a specific target with `FORCE_CLAUDE=1 bash install.sh` or `FORCE_CODEX=1 bash install.sh`.
+
+**Update later:** the installed copies are plain copies, not checkouts — `git pull` updates *this* source repo, then re-run the installer to refresh what's installed:
 
 ```bash
-git clone https://github.com/ykz9527/project-showcase-deck.git ~/.agents/skills/project-showcase-deck
-```
-
-**Or use the installer** (auto-detects Claude Code and/or Codex, installs to both, updates if already present):
-
-```bash
-git clone https://github.com/ykz9527/project-showcase-deck.git && bash project-showcase-deck/install.sh
-```
-
-**Update later:**
-
-```bash
-git -C ~/.claude/skills/project-showcase-deck pull   # or ~/.agents/skills/...
+cd deck-toolkit && git pull && bash install.sh
 ```
 
 Then start a fresh agent session and, from inside any project you want to showcase, just ask:
@@ -84,7 +90,7 @@ Then start a fresh agent session and, from inside any project you want to showca
 
 ## Works in both Claude Code and Codex
 
-The skill format is the same across both agents — a `SKILL.md` (with `name` + `description` frontmatter) plus `references/`, `assets/`, and `scripts/`. **No content changes are needed to run it in Codex** — only the install location differs:
+The installed skill format is the same across both agents — a `SKILL.md` (with `name` + `description` frontmatter) plus `references/`, `assets/`, and `scripts/`, merged flat by `install.sh` from `shared/` and `skills/showcase-deck/`. **No content changes are needed to run it in Codex** — only the install location differs:
 
 | Agent | Personal-skills folder |
 |---|---|
@@ -110,24 +116,43 @@ Both agents load `SKILL.md` on demand when your request matches its description,
 
 ## Layout
 
+**Source (this repo)** — `shared/` is the single source of truth every skill draws on; each skill under `skills/` owns only what's specific to it:
+
 ```
-SKILL.md                     # entry point: DNA, non-negotiables, workflow, red flags
-install.sh                   # one-command installer (Claude Code + Codex)
+install.sh                       # local fan-out installer (Claude Code + Codex)
+shared/
+  references/
+    content-logic.md             # per-slide logic: SCQA, assertion-evidence, Rule of One, C4, trade-offs
+    visual-system.md             # editorial design language, anti-"AI slop", palette/fonts
+    deck-mechanics.md            # single-file structure, themes, edit mode, animations
+  assets/
+    deck-template.html           # the proven skeleton to copy (dark/warm, edit mode,
+                                 #   2 interaction scaffolds, inline architecture figure)
+    interaction-patterns.html    # browsable gallery of 8 working interaction forms —
+                                 #   a palette to copy from, not a checklist to fill
+    img/                         # README figures
+  scripts/
+    verify.sh                    # structure + single-file integrity + delivery floors
+    serve.sh                     # serve a deck on 0.0.0.0 for browser viewing
+skills/
+  showcase-deck/
+    SKILL.md                     # entry point: DNA, non-negotiables, workflow, red flags
+    references/
+      extract-the-soul.md        # what to mine from the repo + honesty grading + vocabulary fidelity
+      narrative-spine.md         # choosing the mainline + nav signposting (SCQA opening)
+```
+
+**Installed (what `install.sh` produces)** — under `~/.claude/skills/showcase-deck/` and/or `~/.agents/skills/showcase-deck/`, `shared/` is merged flat into each skill so every installed folder is self-contained (no `shared/` subdirectory):
+
+```
+SKILL.md
 references/
-  extract-the-soul.md        # what to mine from the repo + honesty grading + vocabulary fidelity
-  narrative-spine.md         # choosing the mainline + nav signposting (SCQA opening)
-  content-logic.md           # per-slide logic: SCQA, assertion-evidence, Rule of One, C4, trade-offs
-  visual-system.md           # editorial design language, anti-"AI slop", palette/fonts
-  deck-mechanics.md          # single-file structure, themes, edit mode, animations
+  extract-the-soul.md, narrative-spine.md          # skill-specific
+  content-logic.md, visual-system.md, deck-mechanics.md   # merged from shared/
 assets/
-  deck-template.html         # the proven skeleton to copy (dark/warm, edit mode,
-                             #   2 interaction scaffolds, inline architecture figure)
-  interaction-patterns.html  # browsable gallery of 8 working interaction forms —
-                             #   a palette to copy from, not a checklist to fill
-  img/                       # README figures
+  deck-template.html, interaction-patterns.html, img/     # merged from shared/
 scripts/
-  verify.sh                  # structure + single-file integrity + delivery floors
-  serve.sh                   # serve a deck on 0.0.0.0 for browser viewing
+  verify.sh, serve.sh                              # merged from shared/
 ```
 
 ## Requirements
