@@ -19,6 +19,17 @@ Delete a marker only once its shape is actually real for this repo. Deleting the
 Every slide: `<section class="slide"> <nav>…</nav> <div class="frame"> …content… </div> </section>`.
 The template includes one worked example of each type: **cover (type + figure), concept/vocabulary, demo (staged-reveal animation), value, value-compare (toggle animation), status/readiness, appendix-divider, appendix-figure, appendix-cards**. Duplicate and fill; delete what you don't need — except the cover figure, the two interactions and the architecture figure, which are floors (see below).
 
+## data-ref anchors (P1: picker / edit locating)
+
+Every slide and every semantic unit inside it carries a stable `data-ref` id so a browser picker (and Claude, editing the deck later) can locate exactly the element to change without re-deriving structure from scratch. Naming, `N` = 1-based slide order:
+
+- `<section class="…slide…">` → `data-ref="s{N}"`.
+- The slide's title element (`h1`/`h2`, or whatever carries the assertion if there's no heading tag) → `data-ref="s{N}-title"`.
+- Each interaction root (`[data-anim]` / `[data-cmp]`, or a bespoke `[data-interaction]`) → `data-ref="s{N}-{slug}"`, where `slug` is a short human kebab for that interaction's topic (e.g. `s3-flow`, `s5-compare`) — not a repeat of `N`.
+- Each `.apx-fig` figure → `data-ref="s{N}-fig"`.
+
+`data-ref` is additive only — it never replaces or displaces `class`, `data-sec`, `data-anim`, `data-cmp`, `data-edit`, etc.; it sits on the same opening tag as those. When you duplicate a slide or an interaction (see "MULTI-INSTANCE" comments throughout the template), give the copy a new `data-ref` too — duplicating the id is as broken as duplicating an `id` attribute. `verify.sh` fails the build if any slide section or interaction root lacks one.
+
 ## Dark / warm theme (how it works)
 
 - Neutral colors are tokens on `:root` (dark defaults). `:root[data-theme="warm"]` overrides them. Semantic accents are unchanged across themes.

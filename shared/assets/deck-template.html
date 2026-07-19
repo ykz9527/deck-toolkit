@@ -227,13 +227,13 @@
        filler; throw it away. A type-led cover with NO figure is a deliberate choice you
        may make only when the headline genuinely carries the whole page — not a default.
        See references/visual-system.md → The cover. -->
-  <section class="slide cover" data-sec="what">
+  <section class="slide cover" data-sec="what" data-ref="s1">
     <nav class="nav"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <div class="cover-lay">
         <div>
           <p class="label" data-edit>PROJECT · one-line category</p>
-          <h1 data-edit>The hook headline — the pain or the promise, in plain words.</h1>
+          <h1 data-edit data-ref="s1-title">The hook headline — the pain or the promise, in plain words.</h1>
           <p class="lede" data-edit>说人话版:一句让外行也懂的话,点明这个项目最值钱的地方。</p>
           <div class="official" data-edit><b>官方定位</b>:粘贴项目的权威一句话定位(从 spec/README 里找,别自己编)。</div>
           <!-- cover-meta: replace with the project's real facts (delete if not useful) -->
@@ -263,11 +263,11 @@
   </section>
 
   <!-- 02 CONCEPT / "what is it" — vocabulary or the problem it solves -->
-  <section class="slide" data-sec="what">
+  <section class="slide" data-sec="what" data-ref="s2">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <p class="label hot" data-edit>是什么 · 一分钟看懂</p>
-      <h2 data-edit>用一句话 + 几个词,把它讲清。</h2>
+      <h2 data-edit data-ref="s2-title">用一句话 + 几个词,把它讲清。</h2>
       <!-- .reveal = the cards build in as this slide scrolls into view (optional,
            cheap; best spent where the staggering itself argues the point) -->
       <div class="grid3 reveal" data-editlist="concepts">
@@ -284,12 +284,12 @@
        To add another staged-reveal interaction: copy this whole <section>, give the
        copy a NEW data-anim name (+ matching data-anim-for) and a NEW data-editlist
        name. Every instance is independent — nothing is global. -->
-  <section class="slide screen" data-sec="what">
+  <section class="slide screen" data-sec="what" data-ref="s3">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <p class="label" data-edit>看它跑一遍 · signature workflow</p>
-      <h2 data-edit>把它的招牌流程,一步步演给你看。</h2>
-      <div class="anim" data-anim="flow" contenteditable="false">
+      <h2 data-edit data-ref="s3-title">把它的招牌流程,一步步演给你看。</h2>
+      <div class="anim" data-anim="flow" data-ref="s3-flow" contenteditable="false">
         <aside class="story">
           <div class="idx">STEP <span class="an-cur">0</span> / <span class="an-tot">3</span></div>
           <ol class="an-steps" data-editlist="anim-steps">
@@ -323,11 +323,11 @@
 
   <!-- 04 VALUE (为何好) — one differentiator per slide. Group under 2-3 headlines
        via the benefit-num tag (e.g. "可用性 · ...", "质量 · ..."). Repeat this slide. -->
-  <section class="slide" data-sec="why">
+  <section class="slide" data-sec="why" data-ref="s4">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <div class="benefit-num"><em>01</em><span data-edit>头线 · 卖点标题</span></div>
-      <h2 data-edit>一句话说清这个卖点为什么值钱。</h2>
+      <h2 data-edit data-ref="s4-title">一句话说清这个卖点为什么值钱。</h2>
       <p class="lede" data-edit>展开:它解决了什么、和常规做法比好在哪。有证据就点出证据(可回溯仓库)。</p>
       <p class="note-foot" data-edit><b>好处:</b>落到用户/团队身上的具体收益。<span style="color:var(--dim)">(技术细节见附录。)</span></p>
     </div>
@@ -343,12 +343,12 @@
        panel) — see references/deck-mechanics.md → Animations, the form menu.
        If the project has no second mechanism worth showing, DON'T pad: go read
        the repo deeper until a real one surfaces. -->
-  <section class="slide screen" data-sec="why">
+  <section class="slide screen" data-sec="why" data-ref="s5">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <p class="label" data-edit>为何好 · 机制对比</p>
-      <h2 data-edit>同一件事,换成它之后,机制上真的不一样。</h2>
-      <div class="cmp" data-cmp="way" contenteditable="false">
+      <h2 data-edit data-ref="s5-title">同一件事,换成它之后,机制上真的不一样。</h2>
+      <div class="cmp" data-cmp="way" data-ref="s5-compare" contenteditable="false">
         <div class="cmp-tabs">
           <button class="on" data-k="a"><span data-edit>老做法</span></button>
           <button data-k="b"><span data-edit>用这个项目</span></button>
@@ -394,11 +394,11 @@
   </section>
 
   <!-- 06 STATUS (现状) — graded honesty: shipped / in-progress / planned -->
-  <section class="slide" data-sec="status">
+  <section class="slide" data-sec="status" data-ref="s6">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <p class="label" data-edit>现状全景</p>
-      <h2 data-edit>已上线、推进中、规划视野,一图看清。</h2>
+      <h2 data-edit data-ref="s6-title">已上线、推进中、规划视野,一图看清。</h2>
       <div class="readiness">
         <article><div class="rh">● 已上线</div><ul data-editlist="ready-shipped"><li data-edit><b>真实</b>已交付的能力</li><li data-edit>再一条</li></ul></article>
         <article><div class="rh">● 推进中</div><ul data-editlist="ready-progress"><li data-edit>正在做、还没完成的</li><li data-edit>再一条</li></ul></article>
@@ -409,10 +409,10 @@
   </section>
 
   <!-- 07 APPENDIX divider (技术细节) — clearly separated deep-dive section -->
-  <section class="slide appendix" data-sec="tech">
+  <section class="slide appendix" data-sec="tech" data-ref="s7">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame" style="text-align:center">
-      <div style="font:600 clamp(40px,6vw,78px)/1 var(--serif);letter-spacing:-.04em;margin-bottom:18px" data-edit>技术附录</div>
+      <div style="font:600 clamp(40px,6vw,78px)/1 var(--serif);letter-spacing:-.04em;margin-bottom:18px" data-edit data-ref="s7-title">技术附录</div>
       <p style="max-width:620px;margin:0 auto;color:var(--tx3);font-size:15px;line-height:1.6" data-edit>面向想深入的读者:架构、内部机制、边界。以下均可回溯真实代码。</p>
     </div>
   </section>
@@ -429,12 +429,12 @@
            free, so one copy covers both themes.
        Either way the deck stays ONE file. Redraw this to the REAL architecture:
        ≤~7 boxes, every arrow one clear meaning, C4 "container" zoom. -->
-  <section class="slide appendix" data-sec="tech">
+  <section class="slide appendix" data-sec="tech" data-ref="s8">
     <nav class="nav bordered"><a class="brand" href="#"><i></i></a><div class="nav-links"></div></nav>
     <div class="frame">
       <p class="label" data-edit>附录 · 系统架构</p>
-      <h2 data-edit>一句话概括这张图讲什么。</h2>
-      <div class="apx-fig">
+      <h2 data-edit data-ref="s8-title">一句话概括这张图讲什么。</h2>
+      <div class="apx-fig" data-ref="s8-fig">
         <!-- PLACEHOLDER-REDRAW: 入口→核心→存储 is the generic shape every system has.
              Redraw to THIS architecture (or inline a drawio export), then delete this marker. -->
         <svg viewBox="0 0 760 250" preserveAspectRatio="xMidYMid meet" role="img" aria-label="架构图">

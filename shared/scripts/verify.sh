@@ -81,6 +81,16 @@ check(f"no un-redrawn placeholders ({len(left)} left)", not left,
       "and the architecture figure must be redrawn to this repo's real thing. Delete each "
       "PLACEHOLDER-REDRAW marker only after its shape is actually real.")
 
+print("-- data-ref anchors (P1: picker/edit locating) --")
+slide_tags = re.findall(r'<section[^>]*class="[^"]*slide[^"]*"[^>]*>', s)
+slides_missing = [t for t in slide_tags if 'data-ref=' not in t]
+check(f"every slide section has data-ref ({len(slide_tags)} slides)", not slides_missing,
+      f"{len(slides_missing)} slide(s) missing data-ref — the picker locates by it")
+iroots = re.findall(r'<[^>]*\bdata-(?:anim|cmp)="[^"]*"[^>]*>', s)
+iroots_missing = [t for t in iroots if 'data-ref=' not in t]
+check(f"every interaction root has data-ref ({len(iroots)} roots)", not iroots_missing,
+      f"{len(iroots_missing)} interaction root(s) missing data-ref")
+
 print()
 print("RESULT:", "PASS" if ok else "ISSUES — fix the FAIL lines above")
 sys.exit(0 if ok else 2)
