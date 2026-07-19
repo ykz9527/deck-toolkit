@@ -1,38 +1,49 @@
 #!/usr/bin/env bash
-# One-command installer for the project-showcase-deck skill.
+# Fan-out installer for the deck-toolkit skills.
 #
-# Installs (or updates) the skill as a git checkout under your agent's
-# personal-skills directory, so `git pull` keeps it current.
+# Reads the local source layout (shared/ + skills/<name>/) that sits next to
+# this script, and materialises each skill as a SELF-CONTAINED, flat directory
+# under your agent's personal-skills dir — shared assets are merged in, so the
+# installed layout matches a classic single-skill folder (no shared/ subdir).
 #
-#   Claude Code : ~/.claude/skills/project-showcase-deck
-#   Codex       : ~/.agents/skills/project-showcase-deck   (same SKILL.md format)
+#   Claude Code : ~/.claude/skills/<name>
+#   Codex       : ~/.agents/skills/<name>   (same SKILL.md format)
 #
 # Usage:
-#   bash install.sh              # auto-detect Claude Code and/or Codex
-#   FORCE_CLAUDE=1 bash install.sh   # force-install the Claude Code target
-#   FORCE_CODEX=1  bash install.sh   # force-install the Codex target
+#   bash install.sh                 # auto-detect Claude Code and/or Codex
+#   FORCE_CLAUDE=1 bash install.sh  # force the Claude Code target
+#   FORCE_CODEX=1  bash install.sh  # force the Codex target
 #
-# The skill lives in a PRIVATE repo, so `git clone` uses your existing git
-# credentials (SSH key or credential helper). Make sure you can reach the repo.
+# Re-run after `git pull` to update installed skills (they are copies, not
+# checkouts). Existing installs are replaced wholesale.
 set -euo pipefail
 
-REPO_URL="https://github.com/ykz9527/project-showcase-deck.git"
-NAME="project-showcase-deck"
+SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[ -d "$SRC/shared" ] && [ -d "$SRC/skills" ] || {
+  echo "install.sh must run from inside a deck-toolkit checkout (shared/ + skills/ next to it)"; exit 1; }
+
+fan_out_one() {
+  local base="$1" name="$2"
+  local dest="$base/$name"
+  rm -rf "$dest"
+  mkdir -p "$dest/references"
+  # 1) skill-specific payload (SKILL.md + its own references)
+  cp -a "$SRC/skills/$name/." "$dest/"
+  # 2) merge shared references, then drop in shared assets + scripts
+  [ -d "$SRC/shared/references" ] && cp -a "$SRC/shared/references/." "$dest/references/"
+  [ -d "$SRC/shared/assets" ]     && cp -a "$SRC/shared/assets"       "$dest/assets"
+  [ -d "$SRC/shared/scripts" ]    && cp -a "$SRC/shared/scripts"      "$dest/scripts"
+}
 
 install_to() {
   local base="$1" label="$2"
-  local dest="$base/$NAME"
   mkdir -p "$base"
-  if [ -d "$dest/.git" ]; then
-    echo "↻ updating $label skill at $dest"
-    git -C "$dest" pull --ff-only
-  elif [ -e "$dest" ]; then
-    echo "⚠ $dest exists but is not a git checkout — leaving it alone."
-    echo "  Remove it and re-run if you want a fresh install."
-  else
-    echo "↓ installing $label skill → $dest"
-    git clone --depth 1 "$REPO_URL" "$dest"
-  fi
+  local name
+  for name in $(cd "$SRC/skills" && ls -1); do
+    [ -f "$SRC/skills/$name/SKILL.md" ] || continue
+    echo "↓ installing $label skill → $base/$name"
+    fan_out_one "$base" "$name"
+  done
 }
 
 installed=0
@@ -42,11 +53,9 @@ fi
 if [ -d "$HOME/.codex" ] || [ -d "$HOME/.agents" ] || [ "${FORCE_CODEX:-}" = "1" ]; then
   install_to "$HOME/.agents/skills" "Codex"; installed=1
 fi
-
 if [ "$installed" = "0" ]; then
-  echo "No ~/.claude or ~/.codex found — defaulting to Claude Code."
+  echo "No ~/.claude or ~/.agents found — defaulting to Claude Code."
   install_to "$HOME/.claude/skills" "Claude Code"
 fi
 
-echo "✓ done. Start a new agent session to pick up the skill, then ask:"
-echo '    "给这个项目做一份介绍 deck"  /  "make a showcase deck for this repo"'
+echo "✓ done. Start a new agent session to pick up the skill(s)."
