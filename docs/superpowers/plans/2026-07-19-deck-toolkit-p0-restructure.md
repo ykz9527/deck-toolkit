@@ -333,7 +333,7 @@ git -C "$REPO" archive p0-baseline | tar -x -C "$BASE"
 fail=0
 cmp_path() {  # $1 = relative path under both trees
   if ! diff -r "$BASE/$1" "$INSTALLED/$1" >/dev/null 2>&1; then
-    echo " FAIL parity: $1 differs from p0-baseline"; diff -r "$BASE/$1" "$INSTALLED/$1" | head; fail=1
+    echo " FAIL parity: $1 differs from p0-baseline"; diff -r "$BASE/$1" "$INSTALLED/$1" | head || true; fail=1
   else
     echo "  OK  $1"
   fi
