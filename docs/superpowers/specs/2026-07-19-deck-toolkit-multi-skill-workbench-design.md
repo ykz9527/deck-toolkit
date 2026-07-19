@@ -40,7 +40,7 @@
 deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 ├─ shared/                           ← 唯一事实源:底座(不重复)
 │   ├─ assets/
-│   │   ├─ deck-template.html        ← 模板(含 data-ref 预埋 + 点选拷贝助手)
+│   │   ├─ deck-template.html        ← 模板(含 data-ref 预埋;picker 不在文件里,serve 时注入)
 │   │   └─ interaction-patterns.html ← 六台机器交互库
 │   ├─ references/
 │   │   ├─ visual-system.md
@@ -48,7 +48,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 │   │   └─ content-logic.md
 │   └─ scripts/
 │       ├─ verify.sh
-│       ├─ serve.sh                  ← 增加热更新
+│       ├─ serve.sh                  ← serve 时注入 picker + 热更新脚本
 │       └─ extract-pdf-figures.sh    ← 论文导图(paper-deck 用)
 ├─ skills/
 │   ├─ showcase-deck/                ← 代码仓 → deck(现有,瘦身)
@@ -74,7 +74,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 
 **模板改动(相对现有):**
 - **预埋 `data-ref`**:每个"可被点选/编辑的语义单元"(幻灯片 section、标题、正文块、交互根、图)在生成时打上稳定的 `data-ref="s3-demo"` 这类 id。这是精确定位的地基(见 §6)——**这是打磨能力真正的核心**,有了它 Claude 才能一击命中要改的地方。
-- **点选拷贝小助手(可选,L2)**:模板内置一个轻量 JS overlay(类似现有 edit mode,一个 toggle 开关):hover 高亮 DOM 节点、点选(shift 多选)、把选中项打包成"引用块"复制到剪贴板。纯前端、只读,不写文件。它**只是省掉你手打 id 的麻烦**;不开它、纯用 data-ref 靠说话定位也能工作。
+- **点选拷贝小助手(可选,L2)= serve 时注入,不烤进文件**:`serve.sh` 升级成一个小 python server,在把页面吐给浏览器的一刻,于 `</body>` 前注入一段轻量 JS overlay(一个 toggle 开关):hover 高亮 DOM 节点、点选(shift 多选)、把选中项打包成"引用块"复制到剪贴板。纯前端、只读,不写文件。**deck 文件本身永远不含这段 JS**——所以交付文件天生干净(无需"剥离"),且对任何 deck(含已生成的老 deck)都生效。它**只是省掉你手打 id 的麻烦**;不开它、纯用 data-ref 靠说话定位也能工作。
 
 ### 5.2 `showcase-deck`(代码仓 → deck,瘦身)
 
@@ -112,7 +112,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 **数据流:**
 
 ```
-①用户在浏览器开点选模式(deck 里一个 toggle,可选;不开就纯说话)
+①用户在浏览器开点选模式(serve 注入的 toggle,可选;不开就纯说话)
       ↓
 ②hover 高亮 → 点选一个/多个 DOM 节点(每个都有 data-ref)
       ↓
@@ -131,7 +131,7 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 ⑥serve 热更新 → 浏览器自动刷新,看到结果 → 不满意回 ②
 ```
 
-**热更新:** `serve.sh` 注入一段轻量脚本,轮询 `index.html` 的 mtime(或 HEAD Last-Modified),变了就 `location.reload()`。简单可靠,不上 websocket。
+**注入实现:** `serve.sh`(升级为小 python server)在 `</body>` 前注入两段脚本:**picker**(①②③)与**热更新**(⑥,轮询 `deck.html` 的 mtime / HEAD Last-Modified,变了就 `location.reload()`,简单可靠不上 websocket)。deck 文件本身不含这两段,见 §5.1/§9。**老 deck 无 data-ref 时**,picker 回退到"页码 + 唯一文本 + outerHTML",`deck-editing` 改到未标记元素时顺手补 data-ref(见 §8)。
 
 ## 7. 打包与安装(方案 A — 底座扇出复制)
 
@@ -147,16 +147,19 @@ deck-toolkit/                        ← 由 project-showcase-deck 原地演进
 - **点选到没有 data-ref 的元素**(比如手工加的老内容):小助手回退到"页码 + outerHTML + 最近的祖先 data-ref",引用块标注"⚠️ 无稳定 id,Claude 需读上下文确认";并建议 Claude 顺手补一个 data-ref。
 - **多选跨页**:引用块按页分组,每页一段,避免 Claude 混淆。
 - **verify 失败**:编辑回路必须在改完后跑 `verify.sh`,FAIL 则回滚(编辑前 `cp` 备份),不把坏页热更新给用户。
-- **热更新轮询**:仅在 serve 模式注入,产出的最终单文件 deck **不含**轮询脚本和点选助手(保持"单文件、可邮寄"的交付底线)——即区分"工作态"与"交付态"。
+- **picker + 热更新**:由 `serve.sh` 在服务时注入,**deck 文件本身从不含它们**。所以"工作态/交付态"不再是两份文件,而是同一份干净文件 + 服务器临时加料。
 
 ## 9. 交付态 vs 工作态(重要)
 
-- **工作态**:带 data-ref、点选助手、热更新脚本,供打磨。
-- **交付态**:`verify.sh` 仍要求单文件、无外部请求。**data-ref 可以保留**(无害,且未来扩展要用);**点选助手 JS 和热更新轮询必须能一键剥离**(一个 `build-deliverable` 小脚本或模板里以注释包裹的可移除块),保证交付的 deck 干净、能邮寄。
+**由"注入"而非"烤入剥离"实现**(见 §5.1):
+
+- **同一份 deck 文件始终是交付态**:只含内容(含惰性的 `data-ref` 属性,无害且未来扩展要用),**从不含 picker/热更新 JS**。因此无需任何"剥离"工序,也就没有"忘了剥离把脏文件发出去"的风险。
+- **工作态 = 交付态文件 + `serve.sh` 现场注入的 picker/热更新**:只存在于浏览器收到的那份响应里,磁盘上的文件不变。
+- `verify.sh` 的单文件/无外部请求底线对这份干净文件天然成立。
 
 ## 10. 测试与验证
 
-- `verify.sh` 扩展:新增 "data-ref 覆盖率" 检查(关键语义单元是否都有 id);"交付态无点选助手/热更新残留" 检查。
+- `verify.sh` 扩展:新增 "data-ref 覆盖率" 检查(关键语义单元是否都有 id)。交付文件本就不含 picker/热更新(注入实现),无需再查"残留"。
 - **真跑用户路径**(项目铁律):装好后,分别用一个真实代码仓、一篇真实论文 PDF 各跑一遍完整链路(生成 → 点选 → 粘引用 → Claude 改 → 热更新看到变化),而不是只跑脚本。
 - 两个主题(暗/暖)都要肉眼验。
 
