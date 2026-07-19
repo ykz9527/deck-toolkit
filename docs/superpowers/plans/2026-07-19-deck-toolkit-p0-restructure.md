@@ -436,3 +436,11 @@ git commit -m "docs: README for deck-toolkit multi-skill layout + fan-out instal
 - 模板加 `data-ref` + 点选拷贝助手 + serve 热更新 + `deck-editing` skill(P1)。
 - `paper-deck` skill + 论文导图脚本(P2)。
 - 远程仓改名、curl 一键安装脚本的适配(可作为 P0 之后的小跟进)。
+
+## 终审修订(实施后,以仓为准)
+
+终审(整分支)后按用户决定做的三处修订,repo 是最终事实源、以下片段仅记录变更意图:
+
+1. **skill 改名收口**:`skills/showcase-deck/SKILL.md` 的 frontmatter `name:` 由 `project-showcase-deck` 改为 `showcase-deck`,与目录名一致(避免 Codex 等按 `name:` 取值的工具分叉)。因此"零回归判据"精确化为:装好的 SKILL.md **除 frontmatter `name:` 这一行外**与 `p0-baseline` 逐字节一致,且 `name:` 必须正好是 `showcase-deck`——`check-parity.sh` 已据此改写(SKILL.md 走 `grep -v '^name:'` 比对 + 正面断言新名)。
+2. **权限位纳入判据**:`check-parity.sh` 增加 `scripts/` 的 mode(`find -printf '%m'`)比对——`verify.sh`/`serve.sh` 是直接执行(`./serve.sh`),`+x` 吃重,`diff -r` 不管 mode 需单独守。
+3. **老名安装残留**:`install.sh` 末尾探测 `<base>/project-showcase-deck` 遗留目录并**告警**(不自动删用户目录);README 增加升级者手动 `rm -rf` 老目录的说明。

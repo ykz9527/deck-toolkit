@@ -82,6 +82,12 @@ Force a specific target with `FORCE_CLAUDE=1 bash install.sh` or `FORCE_CODEX=1 
 cd deck-toolkit && git pull && bash install.sh
 ```
 
+**Upgrading from the old single-skill install?** The pre-P0 version installed to `~/.claude/skills/project-showcase-deck` (and `~/.agents/skills/project-showcase-deck`). The new layout installs as `showcase-deck`, so delete the old directory once to avoid a duplicate skill — the installer prints a reminder if it finds one:
+
+```bash
+rm -rf ~/.claude/skills/project-showcase-deck ~/.agents/skills/project-showcase-deck
+```
+
 Then start a fresh agent session and, from inside any project you want to showcase, just ask:
 
 > "给这个项目做一份介绍 deck"  ·  "make a showcase deck for this repo"

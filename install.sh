@@ -60,4 +60,11 @@ if [ "$installed" = "0" ]; then
   install_to "$HOME/.claude/skills" "Claude Code"
 fi
 
+# Legacy pre-P0 installs lived at <base>/project-showcase-deck (old skill name).
+# Leaving one behind registers a duplicate/stale skill — warn, but never auto-delete
+# a user directory.
+for legacy in "$HOME/.claude/skills/project-showcase-deck" "$HOME/.agents/skills/project-showcase-deck"; do
+  [ -e "$legacy" ] && echo "⚠ legacy install found at $legacy — remove it (it duplicates the renamed 'showcase-deck'): rm -rf \"$legacy\""
+done
+
 echo "✓ done. Start a new agent session to pick up the skill(s)."

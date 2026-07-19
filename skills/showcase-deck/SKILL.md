@@ -1,5 +1,5 @@
 ---
-name: project-showcase-deck
+name: showcase-deck
 description: Use when someone wants to introduce, pitch, or explain a code project/repository to an audience (leadership, newcomers, stakeholders) as a polished single-file HTML slide deck or scrollable presentation — not a README, not docs, but a narrated showcase they can present or share.
 ---
 
