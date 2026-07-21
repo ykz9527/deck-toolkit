@@ -62,7 +62,13 @@ check("animation controls present",
       bool(re.search(r'\w*[Pp]lay\s*\(', s)) and bool(re.search(r'\w*[Nn]ext\s*\(', s)),
       "an interaction needs discrete stepping: play / next / reset")
 figs=re.findall(r'class="apx-fig"(.{0,8000}?)</div>', s, re.S)
-check("architecture diagram present", any(("<svg" in g or "<img" in g) for g in figs),
+# An extracted PDF figure's base64 payload can run ~40k+ chars, far past the 8000-char
+# window above — its </div> never appears inside that slice, so `figs` gets no entry
+# for it at all. Additively accept the shape extract-pdf-figures.sh actually emits: an
+# apx-fig whose FIRST child is the <svg>/<img> itself, regardless of payload length.
+check("architecture diagram present",
+      any(("<svg" in g or "<img" in g) for g in figs)
+      or bool(re.search(r'class="apx-fig"[^>]*>\s*<(?:svg|img)\b', s, re.S)),
       "a deck with the architecture unillustrated is incomplete — use the drawio skill, "
       "or hand-author an inline SVG in the palette if its toolchain is absent. Never skip it.")
 cov=re.search(r'class="slide cover"(.{0,20000}?)</section>', s, re.S)

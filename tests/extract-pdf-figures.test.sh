@@ -48,5 +48,21 @@ if bash "$SCRIPT" "$TMP/nope.pdf" 1 >/dev/null 2>"$TMP/err"; then
   bad "T3 missing PDF should have failed"; else
   grep -qi 'no such PDF' "$TMP/err" && ok "T3 clear error on missing PDF" || bad "T3 wrong/empty error message"; fi
 
+# --- T4: the emitted snippet satisfies verify.sh's "architecture diagram present"
+# check when it is the deck's ONLY figure. Regression for the base64 payload (~40k+
+# chars) blowing past verify.sh's old 8000-char </div>-anchored scan window, which
+# made an extracted apx-fig invisible to the check even though it's the exact shape
+# paper-deck is told to place there.
+snippet="$(bash "$SCRIPT" "$TMP/sample.pdf" 1)" || bad "T4 extract exited non-zero"
+cat > "$TMP/deck.html" <<HTML
+<!doctype html><html><body>
+<section class="slide"><div class="frame">
+$snippet
+</div></section>
+</body></html>
+HTML
+vout="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck.html" 2>&1 || true)"
+echo "$vout" | grep -q '  OK  architecture diagram present' && ok "T4 extracted apx-fig recognised by verify.sh" || bad "T4 extracted apx-fig NOT recognised by verify.sh"
+
 echo "RESULT: $([ $fail -eq 0 ] && echo PASS || echo ISSUES)"
 exit $fail
