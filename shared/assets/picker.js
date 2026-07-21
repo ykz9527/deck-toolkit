@@ -49,7 +49,9 @@
   function block(el){
     var m = slideMeta(slideOf(el));
     var r = refEl(el); var ref = r ? r.getAttribute('data-ref') : null;
-    var html = el.outerHTML.replace(/\s+/g, ' ').trim(); if (html.length > 400) html = html.slice(0, 400) + '…';
+    var html = el.outerHTML.replace(/\s+/g, ' ').trim();
+    html = html.replace(/base64,[A-Za-z0-9+/=]{40,}/g, 'base64,…'); // collapse inlined data-URI payloads (e.g. an extracted apx-fig) before truncating
+    if (html.length > 400) html = html.slice(0, 400) + '…';
     var out = ['📍 第 ' + m.idx + ' 页' + (m.nav ? ' · [' + m.nav + ']' : '') + (m.title ? ' · 「' + m.title + '」' : '')];
     if (ref) out.push('🔑 data-ref="' + ref + '"   ← Claude grep 唯一命中');
     else out.push('⚠️ 该元素无 data-ref;靠页码+片段定位,Claude 请顺手补一个 data-ref');
