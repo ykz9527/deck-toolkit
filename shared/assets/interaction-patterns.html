@@ -7,6 +7,21 @@
 <style>
   /* Same design tokens as deck-template.html. Every pattern below is written in
      these tokens, so it themes for free when copied into a deck. */
+  /* ============================================================================
+     READ THIS FIRST — each machine's code is split across THREE sections of
+     this file, ~700 lines apart, not sitting together as one copy-able block:
+       1. CSS   — right here, in THIS <style> block (top of file), one
+                  "/* ---- name ---- */" comment per pattern.
+       2. HTML  — in <body>, inside <section class="pat" id="...">; each one
+                  ends with a <p class="copy"> line listing the exact classes
+                  to copy.
+       3. JS    — in the <script> block at the BOTTOM of the file, one
+                  "/* ---- NN. name ---- */" comment per pattern.
+     Copying only the markup (2) gets you a dead widget — no styling, no
+     behaviour. Match a pattern across all three by its name/id (e.g. "guard"
+     in the style comment, id="guard" in the <section>, "guard" in the script
+     comment) and copy all three into the deck.
+     ============================================================================ */
   :root{
     --bg:#060606; --paper:#f2eee4; --ink:#15130f; --white:#fff; --muted:#8d8d8d; --dim:#5c5c5c;
     --hairline:rgba(255,255,255,.13);
@@ -214,6 +229,7 @@
   <p class="lede"><b>底下只有 6 台机器。</b>十几种「形式」是这 6 台机器 × 不同的修辞用法,外加几个<b>组合</b>(比如坏输入拦截 = M2 + M1)。这样排是刻意的:<b>你要抄的单位是机器</b>,要挑的单位是修辞。搞清楚哪些共用一台机器,你手搓第 15 种的时候只需要学 6 样东西,而不是被 14 张卡片唬住。</p>
   <p class="lede">依据:Distill 的五类能力(连接人与数据 · 让系统可玩 · 促发自我反思 · 个性化阅读 · 降低认知负荷)、Nicky Case 的可探索解释模式(Puzzle It Out · <b>Place Your Bets</b> · Role Play · Sandbox Mode)、Bret Victor 的直接操纵、Simon Brown 的 <b>C4</b>(「架构图该像 Google 地图那样工作」),以及 AWS re:Invent 的<b>挑战→组件</b>递进揭示。</p>
   <div class="warn"><b>这是调色板,不是清单。</b>deck 的下限是 2 个交互(争取 3)——那是防沉默的地板,永远不是要填满的配额。这么多形式存在,是为了让你<b>找到合适的那个</b>,不是为了让你全用上。Distill 自己的警告在这里同样成立:<em>“不是所有东西都需要交互;误用交互是浪费。”</em>一个不论证真实机制的交互,比一张好的静态页更糟。</div>
+  <div class="warn"><b>每台机器的代码分三段,散在文件三处 —— 都要抄,少一段就是个死组件:</b> ① <b>CSS</b>(本文件顶部 <code>&lt;style&gt;</code> 里,<code>/* ---- 名字 ---- */</code> 注释分段) ② <b>markup</b>(下面每张卡片里,<code>&lt;section class="pat" id="..."&gt;</code>,卡片底部的 <code>.copy</code> 那行列出了具体要抄的 class) ③ <b>JS</b>(文件最底部 <code>&lt;script&gt;</code> 里,<code>/* ---- 编号. 名字 ---- */</code> 注释分段)。三处用同一个名字/id 对齐,只抄 markup 的话,组件是死的。</div>
 
   <table class="mtab">
     <tr><th>机器</th><th>它怎么动</th><th>挂在它上面的修辞</th></tr>

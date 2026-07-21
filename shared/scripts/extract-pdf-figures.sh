@@ -21,6 +21,15 @@
 #   --id REF        data-ref for the emitted wrapper (default: fig-p<page>).
 #   --caption TXT   <div class="apx-cap"> text (default: none).
 #   --out PNG       Also write the raw PNG here (for eyeballing the crop).
+#
+# Finding --crop fractions (there is no shortcut — iterate):
+#   1. First pass: run with NO --crop (or a generous guess) and --out draft.png.
+#   2. Read draft.png (an image-reading tool/agent) to see the whole rendered page.
+#   3. Estimate where the figure sits as fractions of the page — left/top/width/
+#      height, each 0..1 — from what you saw in step 2, and pass those to --crop.
+#   4. Read the newly cropped --out PNG again; if it's off or clipped, adjust the
+#      fractions and repeat. A few rounds is normal.
+#   Bump --dpi (e.g. 220) if small text/axis labels are illegible once cropped.
 set -euo pipefail
 die(){ echo "extract-pdf-figures: $*" >&2; exit 1; }
 command -v pdftoppm >/dev/null || die "pdftoppm (poppler-utils) not found — install poppler, or hand-author an inline SVG of the figure instead."
