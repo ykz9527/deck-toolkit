@@ -56,9 +56,10 @@ A type-led cover with no figure can be excellent — but it is a *deliberate* ch
 
 Change ONLY the accent tokens in `:root` (`--c1..--c5`, `--live/--partial/--design`) to the project's real category colors — keep them muted and earthy. Do not touch the neutral scale or the two-theme structure. If the project has an established brand palette, adapt the accents toward it but keep saturation low enough to read as editorial, not marketing.
 
-## Status colors (fixed meaning)
+## Status colors (fixed roles, skill-defined labels)
 
-- `--live` (green) = shipped, `--partial` (amber) = in-progress, `--design` (grey) = planned. Keep these consistent so the honesty grading reads at a glance.
+- Three grades, always the same visual roles: `--live` (green) = the confident/verified grade, `--partial` (amber) = the partial/intermediate grade, `--design` (grey) = the unproven/aspirational grade. Keep the colors and their ordering consistent so the honesty grading reads at a glance.
+- The WORDING is defined per skill, not fixed here — in the same confident → partial → unproven order: `showcase-deck` labels them 已上线 / 部分落地 / 方向; `paper-deck` labels them 已复现 / 论文声称 / 存疑. Use the labels the active skill specifies — do not import the other skill's wording.
 
 ## Diagrams
 

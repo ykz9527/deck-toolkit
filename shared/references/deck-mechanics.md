@@ -48,7 +48,7 @@ The +/× controls carry class `edit-ctl`, are injected only while editing, and a
 
 ## Static diagrams — required, drawio preferred, SVG fallback
 
-A deck without an architecture picture is incomplete — `verify.sh` fails one. Every deck needs **at least a story-level architecture diagram and one appendix diagram**. Two ways to make them, in order of preference:
+A deck without an architecture picture is incomplete — `verify.sh` fails one. Every deck needs **at least a story-level architecture diagram and one appendix diagram**. (For a paper deck, the paper's **method/framework figure** plays this role — there is no software architecture to draw, and inventing one is not the fix.) Two ways to make them, in order of preference:
 
 **Check availability FIRST.** The drawio skill needs the drawio CLI, or an extracted AppImage + `xvfb` (headless export needs a virtual display; pure-headless segfaults). Probe it before planning around it — and if it isn't there, don't burn the task installing it, take the fallback. *Silently skipping the diagram because drawio was missing is the single most common way this step fails.*
 
@@ -94,7 +94,7 @@ For each chosen moment, go to the specs/docs/code and pull the *real* thing: the
 
 **Pick the interaction FORM that fits the idea — don't reflex to "reveal boxes left-to-right".**
 
-**`assets/interaction-patterns.html` is a working gallery** — open it in a browser, try them, copy the block you want and redraw it. Everything there is written in the palette tokens and is multi-instance safe (fresh `data-*` root name per copy). It is a **palette, not a checklist**: the range exists so you can find the one that fits, not so you can use them all. The floor is 2.
+**`assets/interaction-patterns.html` is a working gallery** — open it in a browser, try them, copy the block you want and redraw it. Everything there is written in the palette tokens and is multi-instance safe (fresh `data-*` root name per copy). It is a **palette, not a checklist**: the range exists so you can find the one that fits, not so you can use them all. The floor is 2. **Each machine's code is split across three sections of that file** — its CSS (top, in `<style>`), its markup (in `<body>`, ending with a `.copy` line listing the exact classes), and its JS (bottom, in `<script>`) — all matched by the same name/id; copy only the markup and you get a dead widget, so pull all three.
 
 **There are only six machines.** The dozen-odd "forms" are those six × different rhetorical uses, plus a few compositions. This matters when you build a bespoke interaction: **the unit you copy is a machine; the unit you choose is a rhetorical move.** Learn six things, not fourteen.
 
