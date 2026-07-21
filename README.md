@@ -1,6 +1,6 @@
 # deck-toolkit
 
-**A multi-skill toolkit that generates and polishes narrated, single-file HTML slide decks — turning a code repository (and, soon, a paper PDF) into a showcase you can present to a human audience, not a README, not docs.**
+**A multi-skill toolkit that generates and polishes narrated, single-file HTML slide decks — turning a code repository or a paper PDF into a showcase you can present to a human audience, not a README, not docs.**
 
 > 一个 Claude Code / Codex skill 工具集:从**代码仓**或**论文 PDF** 生成单文件 HTML 讲解 deck(暗/暖主题、可点击编辑、内置交互动画),并支持在生成后与 AI 持续迭代打磨。
 
@@ -19,8 +19,9 @@ The output is **one `.html` file** — no build step, no external requests, no s
 This repo holds the *source* for a growing family of deck skills, not a single flat skill folder:
 
 - `shared/` — the base every skill draws on: template, visual system, interaction library, and the `verify.sh` / `serve.sh` scripts. Single source of truth, shared by all skills.
-- `skills/showcase-deck/` — code repo → deck (extract the project's soul + build the SCQA mainline). The one skill shipped today.
-- *(P1/P2 will add `skills/paper-deck/` and `skills/deck-editing/`.)*
+- `skills/showcase-deck/` — code repo → deck (extract the project's soul + build the SCQA mainline).
+- `skills/paper-deck/` — research paper / PDF → deck (extract the paper's soul, redraw the method figure as a live interaction, lift result figures faithfully via `extract-pdf-figures.sh`).
+- `skills/deck-editing/` — iterate on an already-built deck: the served page injects a picker, the user clicks an element and pastes the reference block back, this skill turns it into a small verified edit.
 
 `install.sh` fans `shared/` + each `skills/<name>/` out into a flat, self-contained directory per skill — see [Install](#install) and [Layout](#layout) below.
 
@@ -69,10 +70,10 @@ git clone https://github.com/ykz9527/project-showcase-deck.git deck-toolkit
 cd deck-toolkit && bash install.sh
 ```
 
-This installs `showcase-deck` (and any future skills under `skills/`) as self-contained, flat directories:
+This installs `showcase-deck`, `paper-deck`, and `deck-editing` (and any future skills under `skills/`) as self-contained, flat directories:
 
-- Claude Code → `~/.claude/skills/showcase-deck`
-- Codex → `~/.agents/skills/showcase-deck`
+- Claude Code → `~/.claude/skills/showcase-deck`, `~/.claude/skills/paper-deck`, `~/.claude/skills/deck-editing`
+- Codex → `~/.agents/skills/showcase-deck`, `~/.agents/skills/paper-deck`, `~/.agents/skills/deck-editing`
 
 Force a specific target with `FORCE_CLAUDE=1 bash install.sh` or `FORCE_CODEX=1 bash install.sh`.
 
@@ -96,7 +97,7 @@ Then start a fresh agent session and, from inside any project you want to showca
 
 ## Works in both Claude Code and Codex
 
-The installed skill format is the same across both agents — a `SKILL.md` (with `name` + `description` frontmatter) plus `references/`, `assets/`, and `scripts/`, merged flat by `install.sh` from `shared/` and `skills/showcase-deck/`. **No content changes are needed to run it in Codex** — only the install location differs:
+The installed skill format is the same across both agents — a `SKILL.md` (with `name` + `description` frontmatter) plus `references/`, `assets/`, and `scripts/`, merged flat by `install.sh` from `shared/` and each `skills/<name>/`. **No content changes are needed to run it in Codex** — only the install location differs:
 
 | Agent | Personal-skills folder |
 |---|---|
@@ -136,29 +137,40 @@ shared/
                                  #   2 interaction scaffolds, inline architecture figure)
     interaction-patterns.html    # browsable gallery of 8 working interaction forms —
                                  #   a palette to copy from, not a checklist to fill
+    picker.js                    # injected by serve.sh: click-to-copy element picker for deck-editing
     img/                         # README figures
   scripts/
     verify.sh                    # structure + single-file integrity + delivery floors
     serve.sh                     # serve a deck on 0.0.0.0 for browser viewing
+    extract-pdf-figures.sh       # lift a PDF figure as a self-contained inline apx-fig snippet
 skills/
   showcase-deck/
     SKILL.md                     # entry point: DNA, non-negotiables, workflow, red flags
     references/
       extract-the-soul.md        # what to mine from the repo + honesty grading + vocabulary fidelity
       narrative-spine.md         # choosing the mainline + nav signposting (SCQA opening)
+  paper-deck/
+    SKILL.md                     # entry point: paper's soul, method-as-interaction, result figures lifted from the PDF
+    references/
+      extract-the-paper-soul.md  # Paper Brief + paper-context honesty grading + vocabulary fidelity
+      paper-narrative.md         # motivation → gap → idea → method → results → limits spine
+  deck-editing/
+    SKILL.md                     # entry point: turn a pasted picker reference block into a verified edit
+    references/
+      edit-loop.md                # region-level / no-data-ref / structural / multi-select edit loops
 ```
 
-**Installed (what `install.sh` produces)** — under `~/.claude/skills/showcase-deck/` and/or `~/.agents/skills/showcase-deck/`, `shared/` is merged flat into each skill so every installed folder is self-contained (no `shared/` subdirectory):
+**Installed (what `install.sh` produces)** — under `~/.claude/skills/<name>/` on Claude Code (`~/.agents/skills/<name>/` on Codex), `shared/` is merged flat into each of `showcase-deck`, `paper-deck`, and `deck-editing` so every installed folder is self-contained (no `shared/` subdirectory):
 
 ```
 SKILL.md
 references/
-  extract-the-soul.md, narrative-spine.md          # skill-specific
+  <skill-specific references>                            # e.g. extract-the-soul.md, narrative-spine.md for showcase-deck
   content-logic.md, visual-system.md, deck-mechanics.md   # merged from shared/
 assets/
-  deck-template.html, interaction-patterns.html, img/     # merged from shared/
+  deck-template.html, interaction-patterns.html, picker.js, img/   # merged from shared/
 scripts/
-  verify.sh, serve.sh                              # merged from shared/
+  verify.sh, serve.sh, extract-pdf-figures.sh              # merged from shared/
 ```
 
 ## Requirements
