@@ -19,12 +19,13 @@
 #                   script converts them to pixels. Omit to take the whole page.
 #   --dpi N         Render resolution (default 150; bump to 220 for tiny text).
 #   --id REF        data-ref for the emitted wrapper (default: fig-p<page>).
-#   --caption TXT   <figcaption> text (default: none).
+#   --caption TXT   <div class="apx-cap"> text (default: none).
 #   --out PNG       Also write the raw PNG here (for eyeballing the crop).
 set -euo pipefail
 die(){ echo "extract-pdf-figures: $*" >&2; exit 1; }
 command -v pdftoppm >/dev/null || die "pdftoppm (poppler-utils) not found — install poppler, or hand-author an inline SVG of the figure instead."
-command -v pdfinfo  >/dev/null || die "pdfinfo (poppler-utils) not found."
+command -v pdfinfo  >/dev/null || die "pdfinfo (poppler-utils) not found — install poppler, or hand-author an inline SVG of the figure instead."
+command -v base64   >/dev/null || die "base64 (coreutils) not found."
 
 CROP=""; DPI=150; ID=""; CAPTION=""; OUT=""; POS=()
 while [ $# -gt 0 ]; do
@@ -42,6 +43,7 @@ PDF="${POS[0]:-}"; PAGE="${POS[1]:-}"
 [ -n "$PDF" ] && [ -f "$PDF" ] || die "no such PDF: '${PDF:-}'  (usage: extract-pdf-figures.sh <pdf> <page> [opts])"
 [ -n "$PAGE" ] || die "page number required (1-based)"
 case "$PAGE" in ''|*[!0-9]*) die "page must be a positive integer, got '$PAGE'";; esac
+[ "$PAGE" -ge 1 ] || die "page must be >= 1 (1-based), got '$PAGE'"
 [ -n "$ID" ] || ID="fig-p$PAGE"
 
 # page size in points (robust to both pdfinfo forms: "Page size:" and "Page  N size:")
@@ -73,7 +75,7 @@ png="$tmp/fig.png"
 
 b64="$(base64 -w0 "$png" 2>/dev/null || base64 "$png" | tr -d '\n')"
 alt="figure from page $PAGE"; [ -n "$CAPTION" ] && alt="$alt — $CAPTION"
-printf '<figure class="apx-fig" data-ref="%s">\n' "$ID"
+printf '<div class="apx-fig" data-ref="%s">\n' "$ID"
 printf '  <img alt="%s" style="max-width:100%%;height:auto" src="data:image/png;base64,%s"/>\n' "$alt" "$b64"
-[ -n "$CAPTION" ] && printf '  <figcaption class="apx-cap">%s</figcaption>\n' "$CAPTION"
-printf '</figure>\n'
+[ -n "$CAPTION" ] && printf '  <div class="apx-cap">%s</div>\n' "$CAPTION"
+printf '</div>\n'
