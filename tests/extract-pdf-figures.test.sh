@@ -64,5 +64,20 @@ HTML
 vout="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck.html" 2>&1 || true)"
 echo "$vout" | grep -q '  OK  architecture diagram present' && ok "T4 extracted apx-fig recognised by verify.sh" || bad "T4 extracted apx-fig NOT recognised by verify.sh"
 
+# --- T5: verify.sh must still recognise the figure when the wrapper carries a
+# MODIFIER class alongside apx-fig (e.g. class="apx-fig wide") — regression for
+# verify.sh matching the literal string class="apx-fig" instead of apx-fig as one
+# class among several. Build a minimal deck whose only figure is such a wrapper.
+img_tag="$(echo "$snippet" | grep -oE '<img[^>]*>' | head -1)"
+cat > "$TMP/deck-modifier.html" <<HTML
+<!doctype html><html><body>
+<section class="slide"><div class="frame">
+<div class="apx-fig wide" data-ref="s5-fig">$img_tag</div>
+</div></section>
+</body></html>
+HTML
+vout5="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck-modifier.html" 2>&1 || true)"
+echo "$vout5" | grep -q '  OK  architecture diagram present' && ok "T5 apx-fig with modifier class recognised by verify.sh" || bad "T5 apx-fig with modifier class NOT recognised by verify.sh"
+
 echo "RESULT: $([ $fail -eq 0 ] && echo PASS || echo ISSUES)"
 exit $fail
