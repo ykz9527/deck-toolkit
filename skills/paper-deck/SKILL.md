@@ -53,7 +53,7 @@ description: Use when someone wants to explain or present a research paper / PDF
   ```bash
   scripts/extract-pdf-figures.sh <pdf> <page> --crop L,T,W,H --id sN-fig --caption "..."
   ```
-  (`--crop` 是页面的分数裁剪 left,top,width,height,取值 0..1,读页面时用肉眼估;详见脚本头注)。它直接吐一段 `data:` 内联的 `<div class="apx-fig" data-ref="sN-fig">` 片段,粘进 deck 的结果段或技术附录即可。忠实 > 重画。
+  (`--crop` 是页面的分数裁剪 left,top,width,height,取值 0..1,读页面时用肉眼估;详见脚本头注)。它直接吐一段 `data:` 内联的 `<div class="apx-fig" data-ref="sN-fig">` 片段,粘进 deck 的结果段或技术附录即可。忠实 > 重画。非数字的 `--crop` 分数会被静默当成 0,所以裁剪对不对不能只靠猜——加 `--out <png>` 把裁出来的 PNG 单独存一份肉眼核对,确认框住了要的图再粘。文字太小看不清就加 `--dpi`(默认 150)提高渲染分辨率,比如 `--dpi 220`。
 
 **判据很简单:** 想让听众**理解**的(机制)→ 重画成交互;想让听众**信任**的(证据)→ 忠实抽原图。
 
@@ -67,7 +67,7 @@ Claude 用 **Read 工具直接读 PDF**——它原生支持文字与图。不�
 2. **推导主线。** 对 Brief 跑 SCQA(动机 → 缺口 → idea → 方法 → 结果 → 局限),让它产出这篇论文自己的 spine;压成 4–6 个读起来成一句话的 nav 词,写进模板的 `MAINLINE` 数组——改一处,全 deck 跟着走。`references/paper-narrative.md` + `references/content-logic.md`。
 3. **复制模板,填内容——一页一个断言。** 复制 `assets/deck-template.html` 到**项目根 `paper_deck/index.html`**(建目录)。替换内容,nav 词设为主线;**画封面图**——一张安静的静态肖像,源自 Brief 的核心 idea 或论文自己的 teaser 图;每页标题写成完整的结论句 + 一份视觉证据(不是 topic-noun + 项目符号),一个想法、≤~7 元素、≤~50 词。**每个语义单元都要打 `data-ref`**(约定 `sN` / `sN-title` / `sN-{slug}` / `sN-fig`,见 `references/deck-mechanics.md`)——这是之后用户点选编辑的锚点,`verify.sh` 会挡没打的 slide/interaction。`references/deck-mechanics.md` + `references/content-logic.md`。
 4. **把方法图做成 live 交互(floor: 2,争取 3),挑一个不同形式的第二个。** 沿主线走一遍,挑出"看它动"能教会静态图教不会的那个点。**方法/pipeline 图** 是第一个天然候选——用六台机器(`assets/interaction-patterns.html`)之一,把 METHOD IN 3 STEPS 拆成分步演示。第二个交互换一种形式(两个雷同的分步演示只算一个想法)。留在模板里的通用占位形状不算交互。
-5. **抽结果图。** 对每张要忠实呈现的结果图(曲线、消融表、benchmark 对比),跑 `scripts/extract-pdf-figures.sh <pdf> <page> --crop L,T,W,H --id sN-fig --caption "..."`,把吐出的 `apx-fig` 片段粘进结果段或技术附录,`data-ref` 用 `sN-fig`。
+5. **抽结果图。** 对每张要忠实呈现的结果图(曲线、消融表、benchmark 对比),跑 `scripts/extract-pdf-figures.sh <pdf> <page> --crop L,T,W,H --id sN-fig --caption "..."`,把吐出的 `apx-fig` 片段粘进结果段或技术附录,`data-ref` 用 `sN-fig`。裁剪对不对别靠猜,加 `--out <png>` 肉眼核对;文字太小就加 `--dpi` 提分辨率。
 6. **自检 + 起服务。** 运行 `scripts/verify.sh paper_deck/index.html`(**必须传路径**——脚本默认指向 showcase 的路径,不传就会去检查一个不存在的文件)。再**始终**启动预览:`scripts/serve.sh paper_deck/index.html`(后台运行,绑 `0.0.0.0`),把内网 URL 给用户。交付物是验证过的、渲染出来的页面——在页面上迭代(两个主题都看),不是在描述上迭代。
 7. **用 `deck-editing` 技能迭代。** deck 起服务后,注入的 picker 让用户点选任意元素、把引用块粘回聊天;用 **`deck-editing`** 技能把每条引用变成一次可验证的精确修改。不要为了微调就从头重建。
 

@@ -2,7 +2,7 @@
 
 The user is looking at the deck live (`scripts/serve.sh`, picker + hot-reload injected in transit — see `shared/references/deck-mechanics.md` → "Output location & preview" for the general serving model). They click an element, the picker copies a reference block, they paste it here with an instruction after `✏️`. Your job is to turn that block into a small, verified, on-disk edit — nothing more.
 
-`scripts/verify.sh` and `scripts/serve.sh` live under the skill's own `scripts/` directory (installed skills get `shared/scripts/` merged in flat, so `deck-editing/scripts/verify.sh` exists once installed — same file as `showcase-deck/scripts/verify.sh`). All commands below assume you're running from the project root, with the deck at its conventional path `showcase_deck/index.html`; substitute the real path if this project's deck lives elsewhere.
+`scripts/verify.sh` and `scripts/serve.sh` live under the skill's own `scripts/` directory (installed skills get `shared/scripts/` merged in flat, so `deck-editing/scripts/verify.sh` exists once installed — same file as `showcase-deck/scripts/verify.sh`). All commands below assume you're running from the project root, with the deck at its conventional path `showcase_deck/index.html` (the paper-deck flavour's conventional path is `paper_deck/index.html`); substitute the real path if this project's deck lives elsewhere.
 
 ## 1. Region-level loop (the normal case — a reference block with a `🔑 data-ref`)
 

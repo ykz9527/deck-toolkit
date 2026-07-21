@@ -141,11 +141,11 @@ How it's built, if you need to change it: children start hidden and stagger via 
 
 ## Output location & preview
 
-Build the deck to **`showcase_deck/index.html` in the project root** (create the folder). One project = one `showcase_deck/`; when improving an existing deck, it already lives here. Working files (a `.drawio` source, an exported `.svg` before you inline it) may sit in the folder during authoring, but `index.html` must not depend on them — it ships alone.
+Build the deck to **your skill's conventional output path** (`showcase_deck/index.html` for showcase-deck, `paper_deck/index.html` for paper-deck) in the project root (create the folder). One project = one output folder; when improving an existing deck, it already lives here. Working files (a `.drawio` source, an exported `.svg` before you inline it) may sit in the folder during authoring, but `index.html` must not depend on them — it ships alone.
 
 ## Self-check, then serve (always)
 
-Run `scripts/verify.sh` (no-arg defaults to `showcase_deck/index.html`). It is not just a linter — it enforces the delivery floors, so a deck that under-delivers fails:
+Run `scripts/verify.sh` (no-arg default is `showcase_deck/index.html` — that's a fact about the script, not about your skill; if you're building a `paper_deck/`, pass its path explicitly: `scripts/verify.sh paper_deck/index.html`). It is not just a linter — it enforces the delivery floors, so a deck that under-delivers fails:
 
 - **structure** — balanced tags, balanced CSS braces, ≥3 slides, nav present, **no duplicate `id`s** (the classic copy-paste break).
 - **single file** — no external http(s) assets, **no sibling asset files** (any `src=` that isn't `data:`), no external stylesheet.
@@ -153,4 +153,4 @@ Run `scripts/verify.sh` (no-arg defaults to `showcase_deck/index.html`). It is n
 
 A FAIL on the floors is not a formality to route around: it means the deck isn't finished. But fix it by *understanding the repo better*, never by padding — see Step 0 above.
 
-Then **always** launch the preview — `scripts/serve.sh` (no-arg defaults to `showcase_deck/index.html`, binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.
+Then **always** launch the preview — `scripts/serve.sh` (no-arg default is also `showcase_deck/index.html`; a `paper_deck/` build must pass its path explicitly too — `scripts/serve.sh paper_deck/index.html`; binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.
