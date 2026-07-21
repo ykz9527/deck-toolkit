@@ -67,7 +67,11 @@ if [ -n "$CROP" ]; then
 fi
 
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-pdftoppm -png -singlefile -r "$DPI" -f "$PAGE" -l "$PAGE" "${crop_args[@]}" "$PDF" "$tmp/fig" \
+# ${crop_args[@]+"${crop_args[@]}"} instead of "${crop_args[@]}": under `set -u`,
+# bash < 4.4 (stock macOS /bin/bash is 3.2) raises "unbound variable" when expanding
+# an EMPTY array — which is exactly the default no-crop case. The `+` form only
+# expands when the array is set/non-empty, so the default path survives on bash 3.2.
+pdftoppm -png -singlefile -r "$DPI" -f "$PAGE" -l "$PAGE" ${crop_args[@]+"${crop_args[@]}"} "$PDF" "$tmp/fig" \
   || die "pdftoppm failed to render page $PAGE"
 png="$tmp/fig.png"
 [ -f "$png" ] || die "pdftoppm produced no PNG"
