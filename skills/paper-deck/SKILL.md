@@ -1,6 +1,6 @@
 ---
 name: paper-deck
-description: Use when someone wants to explain or present a research paper / PDF (their own or one they are reading) to an audience as a polished single-file HTML slide deck — motivation → gap → idea → method → results → limitations, with the method figure redrawn as a live interaction and result figures lifted faithfully from the PDF. Not a repo showcase (use showcase-deck), not a literal reproduction of the paper.
+description: Use when someone wants to explain or present a research paper / PDF (their own or one they are reading) to an audience as a polished single-file HTML slide deck. A paper already carries its own narrative structure, so the deck follows the paper's own section arc and adds only two things — a one-sentence summary of what each section establishes, and live interactions that make the method understandable — plus result figures lifted faithfully from the PDF. Not a repo showcase (use showcase-deck), not a literal reproduction of the paper.
 ---
 
 # Paper Deck
@@ -9,9 +9,9 @@ description: Use when someone wants to explain or present a research paper / PDF
 
 把一篇论文 PDF 讲成一份单文件、自包含的 HTML 幻灯片 deck,讲给一群人听——同行、跨领域听众、或组会。
 
-**核心原则——质量到底从哪来:** 一份好的 paper deck 不是靠视觉。质量来自 (1) 提炼出论文的**魂**(真实的问题、缺口、一句话能复述的贡献、诚实的局限),(2) 一条听众能复述的**主线**,(3) 论文语境下的**诚实分级**——每条主张都能回溯到论文里的具体图/表/节。视觉形态由 shared 模板一次性解决,不要重新发明。几乎所有差的 paper deck 都是败在魂/主线/诚实,从来不是败在 CSS。
+**核心原则——质量到底从哪来:** 一份好的 paper deck 不是靠视觉。**论文自带叙述结构**,作者已经把它组织成一条论证链——所以 deck 相对论文只加两样东西:(1) **总结性文字**,把每节压成一句"这节确立了什么";(2) **动态交互**,把静态图讲不动的机制一步步演出来。再加上 (3) 论文语境下的**诚实分级**——每条主张都能回溯到论文里的具体图/表/节。视觉形态由 shared 模板一次性解决,不要重新发明。差的 paper deck 都败在"替论文重新叙事",从来不是败在 CSS。
 
-**你不是把论文逐段搬成幻灯片。** 你是在讲一个研究故事:为什么这件事值得做、现有做法哪里不够、这篇论文怎么答、答得站不站得住。
+**两个方向的失败都要避开:** 一头是**逐段搬运**(把论文每一段抄成幻灯片,那不如直接读 PDF);另一头是**重新叙事**(自己造一条主线、重排顺序、把结论改写成更有冲击力的钩子,那是在把听众带离论文)。正确的位置在中间:**顺序沿用论文,内容压成结论,机制做成交互。**
 
 ## When to use
 
@@ -24,9 +24,9 @@ description: Use when someone wants to explain or present a research paper / PDF
 
 1. **魂先于页。** 先填一份 Paper Brief(研究问题、缺口、一句话能复述的核心 idea、方法三步、关键结果、听众、诚实分级)。**用 Claude 的 Read 工具直接读 PDF**,按"摘要/引言 → 方法 → 结果 → 局限"的信号强度顺序读。绝不编造。→ `references/extract-the-paper-soul.md`
 2. **用论文自己的词。** 页面上出现的每个术语,都必须是论文实际用过的(方法名、模块名、指标名、数据集名、章节标题、公式符号),逐字照抄。真术语对外行不透明就旁边加一句白话注解,绝不换成更顺口的近义词或自造一个论文没提过的伞形大词。先建 Brief 的 VOCABULARY 白名单;一个词回溯不到论文原文,就删掉。→ `references/extract-the-paper-soul.md`
-3. **推导唯一主线,不照单点菜。** 对*这篇论文*做 SCQA 的论文对应物(动机 → 缺口 → idea → 方法 → 结果 → 局限),让答案本身决定分段——spine 是推导出来的输出,不是从模板菜单上选的选项。听众要能复述出来。它只存在于**一处**——模板脚本顶部的 `MAINLINE` 数组——改一处、全 deck 跟着变。→ `references/paper-narrative.md`
+3. **沿用论文自己的结构,别重写它。** 论文与代码仓最大的区别是**它自带叙述结构**——作者已经把它组织成一条论证链,每节的位置都有理由。你的活是**压缩和点亮**,不是重新叙事:nav 词直接取自论文的章节骨架(问题 / 方法 / 怎么建的 / 实验 / 局限),只做**合并、省略、按 RQ 切**这类压缩,不做重排、不制造悬念、不发明论文里没有的段落。nav 词只存在于**一处**——模板脚本顶部的 `MAINLINE` 数组。测试:把 nav 词和论文目录并排,能一眼看出对应关系。→ `references/paper-narrative.md`
 4. **只靠 NAV 指路,别的都别加。** 顶部 nav 的词本身就是路线图,当前所在段自动高亮。不要插入转场句或"agenda/大纲"页——这是被明确否决过的做法。一组读起来成一句话的 nav 词,胜过任何衔接性文字。
-5. **断言-证据式标题 + Rule of One。** 每页标题是一句完整的结论句(绝不是"方法"/"实验结果"这种 topic-noun),正文是这句结论的**视觉证据**,不是项目符号墙。一页一个想法,视觉元素 ≤ 约 7 个,文字 ≤ 约 50 词。把标题从头读到尾应该能重建整篇论证。→ `references/content-logic.md`
+5. **标题是总结,不是钩子。** 每页标题是一句完整的结论句——**这一节确立了什么**(既不是"方法"/"实验结果"这种 topic-noun,也不是"你对这个数的直觉大概会高出一倍"这种悬念式营销腔)。用论文自己的术语和数字把结论说完,正文是它的**视觉证据**,不是项目符号墙。一页一个想法,视觉元素 ≤ 约 7 个,文字 ≤ 约 50 词。判据:这句标题,论文作者会点头说"对,这节就是这个意思"吗?→ `references/paper-narrative.md`(反面例子对照表)+ `references/content-logic.md`
 6. **论文语境的激进诚实。** 三档标签——**论文声称 / 已复现 / 存疑**——始终在页面上可见。每条主张都要回溯到论文里具体的图/表/节。绝不编造数字,绝不把"论文声称"偷换成"已复现"。
 7. **故事讲白话,形式化细节进附录。** 主线面向混合听众(同行+跨领域+领导都可能在场),VOCABULARY 里的术语要注解、不堆公式符号。把证明、完整实验表、超参、复杂符号推导都推进独立隔开的技术附录。
 8. **Show, then name。** 把方法的交互演示放在形式化记号**之前**——先让听众相信"这样能 work",他们才会愿意接受它的名字和符号。
@@ -64,7 +64,7 @@ Claude 用 **Read 工具直接读 PDF**——它原生支持文字与图。不�
 ## Workflow
 
 1. **读 PDF 抽魂 → 写 Paper Brief。** `references/extract-the-paper-soul.md`。用 Read 工具从摘要/引言读起(问题、缺口、贡献声称的权威来源),再方法(交互的候选)、结果(区分"真被展示"与"只是被声称")、相关工作(贡献相对谁而新)、局限(诚实边界)。RESEARCH QUESTION、GAP、CORE IDEA、METHOD IN 3 STEPS、KEY RESULTS、AUDIENCE、VOCABULARY、HONESTY 都要具体且有证据,才能继续下一步。
-2. **推导主线。** 对 Brief 跑 SCQA(动机 → 缺口 → idea → 方法 → 结果 → 局限),让它产出这篇论文自己的 spine;压成 4–6 个读起来成一句话的 nav 词,写进模板的 `MAINLINE` 数组——改一处,全 deck 跟着走。`references/paper-narrative.md` + `references/content-logic.md`。
+2. **取论文的结构当主线。** 列出论文的章节骨架,把学术章节名换成听众秒懂的白话,压成 4–6 个 nav 词写进模板的 `MAINLINE` 数组——改一处,全 deck 跟着走。只允许**合并**(Related Work 并进"问题")、**省略**(工程细节推附录)、**按 RQ 切**(实证论文直接用 RQ1–RQn 分段);不重排、不制造悬念、不发明论文没有的段落。写完把 nav 词和论文目录并排比一遍,对不上就是在重写。`references/paper-narrative.md`。
 3. **复制模板,填内容——一页一个断言。** 复制 `assets/deck-template.html` 到**项目根 `paper_deck/index.html`**(建目录)。替换内容,nav 词设为主线;**画封面图**——一张安静的静态肖像,源自 Brief 的核心 idea 或论文自己的 teaser 图;每页标题写成完整的结论句 + 一份视觉证据(不是 topic-noun + 项目符号),一个想法、≤~7 元素、≤~50 词。**每个语义单元都要打 `data-ref`**(约定 `sN` / `sN-title` / `sN-{slug}` / `sN-fig`,见 `references/deck-mechanics.md`)——这是之后用户点选编辑的锚点,`verify.sh` 会挡没打的 slide/interaction。`references/deck-mechanics.md` + `references/content-logic.md`。
 4. **把方法图做成 live 交互(floor: 2,争取 3),挑一个不同形式的第二个。** 沿主线走一遍,挑出"看它动"能教会静态图教不会的那个点。**方法/pipeline 图** 是第一个天然候选——用六台机器(`assets/interaction-patterns.html`)之一,把 METHOD IN 3 STEPS 拆成分步演示。第二个交互换一种形式(两个雷同的分步演示只算一个想法)。留在模板里的通用占位形状不算交互。
 5. **抽结果图。** 对每张要忠实呈现的结果图(曲线、消融表、benchmark 对比),跑 `scripts/extract-pdf-figures.sh <pdf> <page> --crop L,T,W,H --id sN-fig --caption "..."`,把吐出的 `apx-fig` 片段粘进结果段或技术附录,`data-ref` 用 `sN-fig`。`--crop` 分数别靠肉眼盯 PDF 猜——先宽裁/不裁 + `--out` 出图、Read 出来看,量出比例再精裁,反复几轮(详见"图表处理"一节);文字太小就加 `--dpi` 提分辨率。
@@ -76,7 +76,7 @@ Claude 用 **Read 工具直接读 PDF**——它原生支持文字与图。不�
 | Need | Go to |
 |------|-------|
 | 从论文里挖什么 + 诚实分级 + 术语忠实度 | `references/extract-the-paper-soul.md` |
-| 推导主线 + nav 指路 | `references/paper-narrative.md` |
+| 沿用论文结构定 nav + 标题写成总结(附反面例子对照表) | `references/paper-narrative.md` |
 | 每页内容逻辑(断言-证据、Rule of One) | `references/content-logic.md` |
 | 视觉语言、反 AI 味、配色/字体 | `references/visual-system.md` |
 | 单文件结构、组件、主题、edit 模式、data-ref | `references/deck-mechanics.md` |
@@ -96,6 +96,8 @@ Claude 用 **Read 工具直接读 PDF**——它原生支持文字与图。不�
 
 ## Common mistakes (red flags — stop)
 
+- **替论文重新叙事(本 skill 最常见、也最伤的失手)。** 症状:自己造了一条论文里不存在的主线、按"哪个卖点强"重排章节、或把结论改写成更有冲击力的说法。论文的顺序是作者论证的一部分,你的活是压缩不是重编。→ DNA #3
+- **标题写成悬念钩子而不是总结。** "你对这个数的直觉大概会高出一倍"、"它交出的方案正是十年前被推翻的那个"——这是路演腔。听众来听论文,不是来听 pitch。改成"这节确立了什么"的一句话,用论文自己的数字和术语。→ `references/paper-narrative.md` 的对照表
 - **复述摘要当讲解。** 摘要是论文自己的浓缩推销,不是讲给听众的解释——回到抽魂那一步。
 - **重写一份已经成熟的 deck。** 倒退伪装成进步。原地改进,只有在真没有现存 deck 时才从模板开始。
 - **把内容逻辑框架显示在页面上,而不是隐形地应用它**——比如一页真的标着"动机/缺口/idea/方法",而不是让这条逻辑自己在顺序和标题里体现。
