@@ -1,21 +1,25 @@
 # Content & Logic — how each slide earns its place
 
-The mainline (`narrative-spine.md`) is the *order*. This file is the *content logic*: how to open, how to title a slide, how much to put on it, and how to present architecture / schema / trade-offs so a mixed audience actually follows. Distilled from proven technical-talk frameworks (SCQA, Assertion-Evidence, C4, system-design reasoning, RFC/ADR structure).
+The mainline (your skill's own structure/spine reference — e.g. `narrative-spine.md` for a code repo, `paper-narrative.md` for a paper) is the *order*. This file is the *content logic*: how to open, how to title a slide, how much to put on it, and how to present architecture / schema / trade-offs so a mixed audience actually follows. Distilled from proven technical-talk frameworks (SCQA, Assertion-Evidence, C4, system-design reasoning, RFC/ADR structure).
 
 The one enemy behind every failure here: **the curse of knowledge** — you know the internals so well you overestimate what the audience can absorb. Every rule below is a defense against it.
 
-**Apply these frameworks INVISIBLY.** SCQA, assertion-evidence, C4 are tools for shaping the *order and the titles* — not content to put on screen. Never build a slide that displays the scaffold: no page labeled "Situation / Complication / Question / Answer", no visible "assertion-evidence" structure, no C4-level captions as decoration. The audience should feel the logic flow and never be able to name the framework you used. A conspicuous framework reads as academic and was rejected in practice. Reorder slides to open SCQA-style; write titles as assertions — but leave the machinery off the page.
+**Apply these frameworks INVISIBLY.** SCQA, assertion-evidence, C4 are tools for shaping the *order and the titles* — not content to put on screen. Never build a slide that displays the scaffold: no page labeled "Situation / Complication / Question / Answer", no visible "assertion-evidence" structure, no C4-level captions as decoration. The audience should feel the logic flow and never be able to name the framework you used. A conspicuous framework reads as academic and was rejected in practice. Write titles as assertions — but leave the machinery off the page. Whether you *reorder* slides to reach an SCQA-style opening depends on the source: see the next section.
 
-## Open with SCQA — conclusion and pain BEFORE detail
+## Lead with the conclusion — don't make the audience wait for the point
 
-Structure the opening (and often each section) as **Situation → Complication → Question → Answer**, top-down:
+The principle is source-neutral: **open with the conclusion and the pain, before the detail.** How you get there differs by source — slide ORDER itself comes from your skill's own spine/structure reference, not from this file.
+
+**When the order still needs to be created** — a code repo is a set of parallel modules with no inherent sequence of its own — derive the opening as **Situation → Complication → Question → Answer**, top-down:
 
 - **Situation** — the shared, uncontested baseline the audience already accepts. ("Today, extracting the *why* behind a codebase means reading it by hand.")
 - **Complication** — what breaks that baseline; the pain/pressure/risk. This creates the tension. ("That knowledge lives in people's heads and evaporates when they leave.")
 - **Question** — the crisp problem it forces. ("How do you make a codebase remember its own design rationale?")
 - **Answer** — the top-level conclusion **first**, then details later. Don't make them wait through architecture to learn what the thing does.
 
-This is the antidote to "bio → history → background → … → finally the point". Hit the pain or the payoff in the first slide, not five slides in. (Delivery echo: cut self/company/history intro; the first 30 seconds decide whether they keep listening.)
+**When the source already carries its own order** — a research paper argues in a fixed sequence — that order governs: do not re-shuffle it to force an SCQA shape. You still open with the conclusion, but by *summarizing* it up front, not by re-sequencing the source.
+
+Either way, this is the antidote to "bio → history → background → … → finally the point". Hit the pain or the payoff in the first slide, not five slides in. (Delivery echo: cut self/company/history intro; the first 30 seconds decide whether they keep listening.)
 
 ## Assertion-Evidence — the single highest-leverage slide rule
 
@@ -35,9 +39,11 @@ This is the antidote to "bio → history → background → … → finally the 
 - **Body prose ≤ ~50 words.** Anything more is speaker narration, not a slide. When it feels cramped, the fix is *less text*, never smaller text.
 - This is *why* the deck splits story (plain, sparse) from appendix (depth) — it keeps each story slide inside the budget.
 
-## Architecture: layer it (C4), don't dump it
+## Complex structure: layer it, don't dump it
 
-Never paste the full topology. Disclose in **audience-appropriate zoom levels** (Simon Brown's C4 — "architecture diagrams should work like Google Maps"):
+The general principle is source-neutral: **disclose a complex structure in audience-appropriate zoom levels, never all at once.** For a code repo, the model is Simon Brown's **C4** ("architecture diagrams should work like Google Maps"). For a paper, the analogue is its own method/framework figure: start at the overview, then reveal sub-mechanisms only where a point needs them, rather than showing the whole thing at once.
+
+For a code repo: never paste the full topology. Disclose in these C4 zoom levels:
 
 | Level | Shows | For | In the deck |
 |---|---|---|---|
@@ -77,6 +83,6 @@ Don't drop a finished mega-diagram at once. Start minimal, then **"introduce a c
 - [ ] Title is a full sentence stating this slide's conclusion (not a topic word).
 - [ ] The body is visual evidence for that title, not a bullet dump.
 - [ ] One idea; ≤ ~7 elements; ≤ ~50 words of prose.
-- [ ] Any architecture is at the right C4 zoom for this audience; every arrow/color means something.
+- [ ] Any complex structure (a code repo's architecture, a paper's method figure) is disclosed at the right zoom level for this audience; every arrow/color means something.
 - [ ] Any "why this design" slide shows the trade-off, not just the winner.
 - [ ] Reading titles alone reconstructs the argument.

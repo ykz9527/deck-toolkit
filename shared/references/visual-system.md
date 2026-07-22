@@ -43,7 +43,8 @@ The cover is the first read, and it is where a deck either looks like THIS proje
 | produces a distinctive artifact | draw that artifact, framed, at rest (a schema card, a graph node, a generated file) |
 | is a structure / graph / index | a small quiet map of the REAL topology — a portrait of its shape, not a flowchart |
 | is a loop / workflow | the loop as one closed static shape |
-| has a distinctive product UI | a reduced, stylized echo of the real screen (not a screenshot) |
+| has a distinctive product UI (repo) | a reduced, stylized echo of the real screen (not a screenshot) |
+| has a distinctive result/teaser figure (paper) | a reduced, stylized echo of that figure — not a pasted reproduction |
 | converts A into B | the two real artifacts side by side, one mark between them |
 
 Rules: **static** (never animate the cover), **quiet** (the headline still leads), ≤~7 elements, palette tokens only, and everything on the hard-no list above still applies.

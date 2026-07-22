@@ -6,7 +6,7 @@ How the single-file deck is built. Start from `assets/deck-template.html` — it
 
 Four things in the template are **shapes standing in for work you haven't done yet**: the cover figure, the staged-reveal stage, the compare stage, and the architecture figure. Each carries a `PLACEHOLDER-REDRAW` marker in an HTML comment, and **`verify.sh` fails while any marker remains** — so the template itself does not pass its own check, by design. A deck does.
 
-Delete a marker only once its shape is actually real for this repo. Deleting the marker without redrawing turns a silent default into a deliberate lie — the gate can force a conscious act, it can't force honesty.
+Delete a marker only once its shape is actually real for the source you're presenting — this repo's real mechanism, or this paper's real method. Deleting the marker without redrawing turns a silent default into a deliberate lie — the gate can force a conscious act, it can't force honesty.
 
 ## Single-file, self-contained
 
@@ -61,28 +61,28 @@ A deck without an architecture picture is incomplete — `verify.sh` fails one. 
 
 ## Animations — interaction that argues the design idea
 
-The most impactful (and hardest) piece. **Design it from your repo understanding, then hand-author inline SVG.** One generic "input → process → output" pipeline is a failure. The interaction exists to make the audience *feel* the project's core design idea — so first decide which idea, then which moments deserve interaction.
+The most impactful (and hardest) piece. **Design it from your understanding of the source — the repo's real mechanisms, or the paper's real method — then hand-author inline SVG.** One generic "input → process → output" pipeline is a failure. The interaction exists to make the audience *feel* the source's core design idea — so first decide which idea, then which moments deserve interaction.
 
 ### Step 0 — decide WHICH slides get interaction (and how many)
 
 The floor is **2 interactive moments, aim for 3**, and the template already ships two scaffolds in different forms — so the count is handled for you. Your job is not "how many" but **which moments, and is each one earned**. A slide earns interaction only when *seeing it move* teaches something a static picture can't. Walk the mainline and ask at each candidate: **which design principle does this project live or die on, and would an interaction let the audience feel it?**
 
-Because two scaffolds ship pre-wired, the failure mode shifts: it is no longer "I only built one", it is **filling both with the template's generic shapes**. A staged reveal of 输入→处理→产出, or a toggle of 手工维护 vs 单一事实源, left roughly as shipped, is not two interactions — it's zero. Both must be redrawn to *this* repo's real mechanisms.
+Because two scaffolds ship pre-wired, the failure mode shifts: it is no longer "I only built one", it is **filling both with the template's generic shapes**. A staged reveal of 输入→处理→产出, or a toggle of 手工维护 vs 单一事实源, left roughly as shipped, is not two interactions — it's zero. Both must be redrawn to the source's real mechanisms — this repo's, or this paper's.
 
-**The floor and the quality bar are both hard — and quality wins ties.** Never add an interaction just to reach the count; a hollow "for interaction's sake" demo is worse than a strong static slide. But "I only found one" is usually not a real ceiling — it's a signal you don't yet understand the repo deeply enough. Go back and read more: the real workflow code, the specs, the data model, the module that implements the differentiator. The material for a genuine second (and third) interaction almost always surfaces once you see the project clearly. Research harder before you settle for fewer.
+**The floor and the quality bar are both hard — and quality wins ties.** Never add an interaction just to reach the count; a hollow "for interaction's sake" demo is worse than a strong static slide. But "I only found one" is usually not a real ceiling — it's a signal you don't yet understand the source deeply enough. Go back and read more: for a code repo, the real workflow code, the specs, the data model, the module that implements the differentiator; for a paper, the method section, the experimental setup, the ablations. The material for a genuine second (and third) interaction almost always surfaces once you see the source clearly. Research harder before you settle for fewer.
 
-Common earners (pick the ones true for THIS repo):
+Common earners (pick the ones true for THIS source):
 
-- **The signature workflow** — the one loop the product is *for*. Almost always worth it. Mimic the real screen as a staged click-through.
+- **The signature workflow (repo) / the method pipeline (paper)** — for a code repo, the one loop the product is *for*: mimic the real screen as a staged click-through. For a paper, its method pipeline, or a real worked example walked through the paper's own steps. Almost always worth it.
 - **The "why it's better" mechanism** — if a value slide claims something structural (incremental vs full rebuild, graph-derived vs hardcoded, drift-guard catches X), *show the mechanism doing its thing* instead of asserting it. This is where interaction beats prose the most.
 - **A before/after or two-journeys toggle** — if the pitch is "old way vs our way" or "use it / extend it", a toggle that flips the same stage between the two states lands harder than two static slides.
 - **A concept that only makes sense in motion** — a dependency ripple, a schema edge binding an operator, a queue draining. If the vocabulary slide has a concept people keep misunderstanding, animate *that*.
 
 Skip interaction on slides where a sentence or a static diagram is already the honest, complete story. Interaction on a slide that doesn't need it is clutter, not richness.
 
-### Step 1 — decide WHAT each one animates (from the repo)
+### Step 1 — decide WHAT each one animates (from the source)
 
-For each chosen moment, go to the specs/docs/code and pull the *real* thing: the real screen/route, its real steps, its real vocabulary, the real artifact a step produces. The animation must mimic *that*, faithfully. Name the design principle the animation is arguing, in one sentence, before drawing — if you can't, it's decoration, cut it.
+For each chosen moment, go to the source and pull the *real* thing. For a code repo: the specs, the docs, the code — the real screen/route, its real steps, its real vocabulary, the real artifact a step produces. For a paper: the method section and its figures — the real steps, its real vocabulary, the real intermediate artifact a step produces. The animation must mimic *that*, faithfully. Name the design principle the animation is arguing, in one sentence, before drawing — if you can't, it's decoration, cut it.
 
 ### Step 2 — decide HOW (mimic the real UI as a click-through)
 
@@ -129,7 +129,7 @@ Combine sparingly. The richness that matters is *fidelity to the real mechanism*
 
 Both are **multi-instance by construction**: every instance keys off its own root attribute and holds its own step/timer state — nothing is global, and there are no `id`s to collide. **To add a third interaction, copy the whole `<section>` and give the copy a new `data-anim` / `data-cmp` name** (plus a matching `data-anim-for` and a fresh `data-editlist` name). It just works; verify it with `verify.sh`.
 
-Redraw both SVGs to the project's real flow and real mechanism — the shipped ones are shapes, not answers. For a rich product UI, expect a scaffold to grow into a bespoke SVG scene; that's expected, the scaffolds are the starting grammar, not the ceiling. **A bespoke interaction that uses neither root attribute should carry `data-interaction="name"`** so it still counts toward the floor in `verify.sh`.
+Redraw both SVGs to the source's real flow and real mechanism — the shipped ones are shapes, not answers. For a rich product UI (or a paper with a rich method diagram), expect a scaffold to grow into a bespoke SVG scene; that's expected, the scaffolds are the starting grammar, not the ceiling. **A bespoke interaction that uses neither root attribute should carry `data-interaction="name"`** so it still counts toward the floor in `verify.sh`.
 
 ## Light dynamic touch — reveal-on-view (already in the template)
 
@@ -151,6 +151,6 @@ Run `scripts/verify.sh` (no-arg default is `showcase_deck/index.html` — that's
 - **single file** — no external http(s) assets, **no sibling asset files** (any `src=` that isn't `data:`), no external stylesheet.
 - **delivery floors** — themes wired, edit mode + `data-editlist` wired, **≥2 interaction roots**, animation controls present, **architecture diagram present**, **cover figure present**, **zero `PLACEHOLDER-REDRAW` markers left**.
 
-A FAIL on the floors is not a formality to route around: it means the deck isn't finished. But fix it by *understanding the repo better*, never by padding — see Step 0 above.
+A FAIL on the floors is not a formality to route around: it means the deck isn't finished. But fix it by *understanding the source better*, never by padding — see Step 0 above.
 
 Then **always** launch the preview — `scripts/serve.sh` (no-arg default is also `showcase_deck/index.html`; a `paper_deck/` build must pass its path explicitly too — `scripts/serve.sh paper_deck/index.html`; binds `0.0.0.0`; run it in the background) — and give the user the LAN URL. Never finish by handing over a bare file path. Iterate on the rendered page (both themes), not on descriptions.
