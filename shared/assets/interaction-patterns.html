@@ -221,7 +221,8 @@
 /* ---- figtour(图上导览:抽来的原图 + 分步聚光)---------------------------
    把交互长在论文/产品的原图之上,而不是用手画的简化图把原图换掉。原图保真,
    聚光负责讲清楚。坐标一律用百分比,所以换分辨率、换裁剪都不用改 JS。         */
-.ftour{position:relative;display:block;max-width:100%;line-height:0;}
+.ftour{position:relative;display:block;max-width:100%;line-height:0;overflow:hidden;}
+/* overflow:hidden 是必须的:.ft-spot 用 9999px 的 box-shadow 造聚光,不裁就会把整页压暗。 */
 .ftour img,.ftour svg{display:block;width:100%;height:auto;}
 .ftour .ft-spot{position:absolute;border:2px solid var(--c5);
   box-shadow:0 0 0 9999px rgba(0,0,0,.66);
@@ -702,7 +703,7 @@
 <div class="grp" id="m1b">
   <h3>M1 · 图上导览 — step through the ORIGINAL figure</h3>
   <p>这是 M1 最重要的一种用法,专治「保真」和「讲清楚」的两难:<b>抽来的原图信息最全但静止,手画的简化图会动却丢信息</b>。答案不是二选一,是把步进器<b>叠在原图上</b>——原图一个像素都不改,聚光带着听众一处一处看。</p>
-  <div class="mbox"><b>机器:</b>还是 M1 的 step 下标,只是「点亮」换成了在原图上挪一个百分比定位的聚光框(<code>box-shadow: 0 0 0 9999px</code> 把框外压暗)。<br><i>为什么用百分比:</i>原图换分辨率、重新裁剪、换主题都不用动 JS。<br><i>M3 变体:</i>把聚光框换成若干个透明热点 <code>&lt;button&gt;</code>,点哪块出哪块的解释,就是「图上热点」。</div>
+  <div class="mbox"><b>机器:</b>还是 M1 的 step 下标,只是「点亮」换成了在原图上挪一个百分比定位的聚光框(<code>box-shadow: 0 0 0 9999px</code> 把框外压暗)。<br><i>为什么用百分比:</i>原图换分辨率、重新裁剪、换主题都不用动 JS。<br><i>两个必踩的坑:</i>① <code>.ftour</code> 必须 <code>overflow:hidden</code>,否则 9999px 遮罩会压暗整页;② 字幕/圆点的 id 必须由根 id 派生(<code>id+'Cap'</code>),写死就只能有一个实例——一页放两个导览时第二个会吃掉第一个的字幕。<br><i>M3 变体:</i>把聚光框换成若干个透明热点 <code>&lt;button&gt;</code>,点哪块出哪块的解释,就是「图上热点」。</div>
 </div>
 
 <section class="pat" id="figtour">
@@ -737,12 +738,12 @@
     </svg>
     <div class="ft-spot" style="left:2%;top:6%;width:30%;height:28%"></div>
   </div>
-  <p class="ftcap" id="ftCap"><b>点「下一步」开始。</b>聚光会带你按论证顺序走一遍这张原图。</p>
+  <p class="ftcap" id="ftDemoCap"><b>点「下一步」开始。</b>聚光会带你按论证顺序走一遍这张原图。</p>
   <div class="row">
     <button class="btn" onclick="ftPlay('ftDemo')">▶ 自动播放</button>
     <button class="btn" onclick="ftNext('ftDemo')">下一步</button>
     <button class="btn" onclick="ftReset('ftDemo')">重置</button>
-    <span class="ftdots" id="ftDots"></span>
+    <span class="ftdots" id="ftDemoDots"></span>
   </div>
   <p class="cap">真实用法里,<code>&lt;svg&gt;</code> 换成 <code>extract-pdf-figures.sh</code> 抽出来的 <code>&lt;img src="data:…"&gt;</code>,步骤坐标按你在原图上量到的百分比填。</p>
 </div>
@@ -1018,10 +1019,10 @@ function ftGo(id, i){
     var s = st[i-1], sp = root.querySelector('.ft-spot');
     sp.style.left = s.x+'%'; sp.style.top = s.y+'%';
     sp.style.width = s.w+'%'; sp.style.height = s.h+'%';
-    var cap = document.getElementById('ftCap');
+    var cap = document.getElementById(id+'Cap');      /* 按根 id 派生 → 多实例安全 */
     if(cap) cap.innerHTML = '<span class="ftn">'+i+'/'+st.length+'</span>'+s.t;
   }
-  var dots = document.getElementById('ftDots');
+  var dots = document.getElementById(id+'Dots');
   if(dots) dots.innerHTML = st.map(function(_,k){ return '<i class="'+(k<i?'on':'')+'"></i>'; }).join('');
 }
 function ftNext(id){
@@ -1038,12 +1039,12 @@ function ftPlay(id){
     var i = +root.getAttribute('data-step') || 0;
     if(i >= st.length){ clearInterval(ftT[id]); return; }
     ftGo(id, i+1);
-  }, 2600);
+  }, 4200);   /* 中文一句话读完约 4s;2600 太赶 */
 }
 function ftReset(id){
   clearInterval(ftT[id]);
   ftGo(id, 0);
-  var cap = document.getElementById('ftCap');
+  var cap = document.getElementById(id+'Cap');
   if(cap) cap.innerHTML = '<b>点「下一步」开始。</b>聚光会带你按论证顺序走一遍这张原图。';
 }
 ftReset('ftDemo');
