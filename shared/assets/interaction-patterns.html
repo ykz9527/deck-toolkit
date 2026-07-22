@@ -217,6 +217,24 @@
   .mtab th{color:var(--c4);font:700 10px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;}
   .mtab td{color:var(--tx2);line-height:1.55;} .mtab td b{color:var(--tx-hi);}
   .mtab td code{font-size:11.5px;}
+
+/* ---- figtour(图上导览:抽来的原图 + 分步聚光)---------------------------
+   把交互长在论文/产品的原图之上,而不是用手画的简化图把原图换掉。原图保真,
+   聚光负责讲清楚。坐标一律用百分比,所以换分辨率、换裁剪都不用改 JS。         */
+.ftour{position:relative;display:block;max-width:100%;line-height:0;}
+.ftour img,.ftour svg{display:block;width:100%;height:auto;}
+.ftour .ft-spot{position:absolute;border:2px solid var(--c5);
+  box-shadow:0 0 0 9999px rgba(0,0,0,.66);
+  transition:left .45s var(--ease),top .45s var(--ease),width .45s var(--ease),height .45s var(--ease),opacity .3s;
+  pointer-events:none;}
+:root[data-theme="warm"] .ftour .ft-spot{box-shadow:0 0 0 9999px rgba(250,247,240,.78);}
+.ftour[data-step="0"] .ft-spot{opacity:0;}
+.ftcap{margin-top:12px;font:14.5px/1.6 var(--sans);color:var(--tx2);min-height:3.2em;}
+.ftcap b{color:var(--tx-hi);}
+.ftcap .ftn{font:11px var(--mono);color:var(--c5);margin-right:7px;}
+.ftdots{display:flex;gap:6px;align-items:center;margin-left:auto;}
+.ftdots i{width:7px;height:7px;border-radius:50%;background:var(--tx3);opacity:.3;}
+.ftdots i.on{opacity:1;background:var(--c5);}
 </style>
 </head>
 <body>
@@ -233,7 +251,7 @@
 
   <table class="mtab">
     <tr><th>机器</th><th>它怎么动</th><th>挂在它上面的修辞</th></tr>
-    <tr><td><b><a href="#m1" style="color:inherit">M1 步进序列</a></b></td><td>step 下标,<code>data-s &lt;= step</code> 点亮</td><td>分步揭示 · 挑战→组件 · Agent 面板</td></tr>
+    <tr><td><b><a href="#m1" style="color:inherit">M1 步进序列</a></b></td><td>step 下标,<code>data-s &lt;= step</code> 点亮</td><td>分步揭示 · 挑战→组件 · Agent 面板 · <b><a href="#m1b" style="color:inherit">图上导览</a></b> <em>(叠在抽来的原图上)</em></td></tr>
     <tr><td><b><a href="#m2" style="color:inherit">M2 选中 N 态</a></b></td><td>点 tab → <code>.on</code> 移到匹配组</td><td>对比切换 / 视角切换 <em>(同一份代码:tab 数 + 什么留在组外)</em> · 坏输入拦截 <em>(M2+M1 组合)</em></td></tr>
     <tr><td><b><a href="#m3" style="color:inherit">M3 点元素看细节</a></b></td><td>点图元 → 显示它的 payload</td><td>按需展开(句子) · 代码锚点(真代码) · StretchText(行内) · C4 缩放(另一张图)</td></tr>
     <tr><td><b><a href="#m4" style="color:inherit">M4 连续参数</a></b></td><td>range 拖动 → 重算重画</td><td>参数旋钮 · 历史拖拽</td></tr>
@@ -680,6 +698,57 @@
 
 </div>
 
+
+<div class="grp" id="m1b">
+  <h3>M1 · 图上导览 — step through the ORIGINAL figure</h3>
+  <p>这是 M1 最重要的一种用法,专治「保真」和「讲清楚」的两难:<b>抽来的原图信息最全但静止,手画的简化图会动却丢信息</b>。答案不是二选一,是把步进器<b>叠在原图上</b>——原图一个像素都不改,聚光带着听众一处一处看。</p>
+  <div class="mbox"><b>机器:</b>还是 M1 的 step 下标,只是「点亮」换成了在原图上挪一个百分比定位的聚光框(<code>box-shadow: 0 0 0 9999px</code> 把框外压暗)。<br><i>为什么用百分比:</i>原图换分辨率、重新裁剪、换主题都不用动 JS。<br><i>M3 变体:</i>把聚光框换成若干个透明热点 <code>&lt;button&gt;</code>,点哪块出哪块的解释,就是「图上热点」。</div>
+</div>
+
+<section class="pat" id="figtour">
+  <div class="n">变体 1E · 原图之上</div>
+  <h2>图上导览</h2>
+  <p class="claim">Argues: <b>“这张原图里发生的事,按这个顺序看就懂了。”</b></p>
+  <p class="when"><b>用在</b>论文/文档自带一张信息量很大的图(动机图、pipeline、案例对照)、你既不想丢它的细节又要讲清楚它的时候——<b>这几乎总比重画一张简化图好</b>。<b>别</b>用在原图本来就一眼看懂的时候。</p>
+<div class="demo">
+  <div class="ftour" id="ftDemo" data-interaction="figtour" data-step="0">
+    <!-- 真实用法:这里换成 extract-pdf-figures.sh 吐出来的 <img src="data:image/png;base64,…">
+         下面这张 SVG 只是 gallery 里的替身,好让这张卡片能独立跑起来。 -->
+    <svg viewBox="0 0 640 260" role="img" aria-label="替身原图">
+      <rect width="640" height="260" fill="var(--panel)"/>
+      <rect x="18" y="20" width="180" height="66" fill="none" stroke="var(--tx3)"/>
+      <text x="28" y="46" font-family="var(--mono)" font-size="12" fill="var(--tx-hi)">issue #11707</text>
+      <text x="28" y="68" font-family="var(--mono)" font-size="11" fill="var(--tx3)">tests passed</text>
+      <rect x="18" y="110" width="180" height="60" fill="none" stroke="var(--c2)"/>
+      <text x="28" y="136" font-family="var(--mono)" font-size="12" fill="var(--tx-hi)">later reverted</text>
+      <text x="28" y="156" font-family="var(--mono)" font-size="11" fill="var(--tx3)">PostgreSQL 上失效</text>
+      <rect x="240" y="20" width="200" height="150" fill="none" stroke="var(--tx3)"/>
+      <text x="250" y="44" font-family="var(--mono)" font-size="11" fill="var(--tx3)">Commenter B: …distinct()</text>
+      <text x="250" y="70" font-family="var(--mono)" font-size="11" fill="var(--tx3)">Commenter C: would be</text>
+      <text x="250" y="88" font-family="var(--mono)" font-size="11" fill="var(--tx3)">completely broken…</text>
+      <text x="250" y="120" font-family="var(--mono)" font-size="11" fill="var(--tx3)">D: adding Exists()?</text>
+      <rect x="470" y="20" width="152" height="150" fill="none" stroke="var(--c5)"/>
+      <text x="480" y="44" font-family="var(--mono)" font-size="11" fill="var(--c5)">Hidden Design</text>
+      <text x="480" y="62" font-family="var(--mono)" font-size="11" fill="var(--c5)">Constraints</text>
+      <text x="480" y="92" font-family="var(--mono)" font-size="10.5" fill="var(--tx3)">Problem / Option 1</text>
+      <text x="480" y="110" font-family="var(--mono)" font-size="10.5" fill="var(--tx3)">Option 2 / condition</text>
+      <rect x="240" y="196" width="382" height="46" fill="none" stroke="var(--c2)"/>
+      <text x="250" y="224" font-family="var(--mono)" font-size="11" fill="var(--c2)">Latent Technical Debt: passed tests, broke reliability</text>
+    </svg>
+    <div class="ft-spot" style="left:2%;top:6%;width:30%;height:28%"></div>
+  </div>
+  <p class="ftcap" id="ftCap"><b>点「下一步」开始。</b>聚光会带你按论证顺序走一遍这张原图。</p>
+  <div class="row">
+    <button class="btn" onclick="ftPlay('ftDemo')">▶ 自动播放</button>
+    <button class="btn" onclick="ftNext('ftDemo')">下一步</button>
+    <button class="btn" onclick="ftReset('ftDemo')">重置</button>
+    <span class="ftdots" id="ftDots"></span>
+  </div>
+  <p class="cap">真实用法里,<code>&lt;svg&gt;</code> 换成 <code>extract-pdf-figures.sh</code> 抽出来的 <code>&lt;img src="data:…"&gt;</code>,步骤坐标按你在原图上量到的百分比填。</p>
+</div>
+  <div class="copy">要抄:<code>.ftour</code> / <code>.ft-spot</code> / <code>.ftcap</code> / <code>.ftdots</code>(CSS)+ 本卡片的 markup + <code>ftGo/ftNext/ftPlay/ftReset</code>(JS),三处对齐同一个根 id。</div>
+</section>
+
 <script>
 function tg(){var w=document.documentElement.getAttribute('data-theme')==='warm';
   if(w)document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme','warm');}
@@ -927,6 +996,57 @@ document.querySelectorAll('.stx').forEach(function(term){
     if(x&&x.classList.contains('stx-x'))x.classList.toggle('on');
   });
 });
+
+/* ---- 1E. figtour(图上导览) --------------------------------------------
+   步骤 = 在原图上的百分比矩形 + 一句解释。坐标用百分比,所以原图换分辨率/
+   重新裁剪都不用动这里。多实例安全:每个根 id 自己一份 steps + timer。      */
+var FT = {
+  ftDemo: [
+    {x:2,  y:6,  w:30, h:28, t:'<b>2009:初版补丁通过了全部测试</b>,于是被接受——这正是今天 benchmark 判定「成功」的标准。'},
+    {x:2,  y:40, w:30, h:26, t:'<b>但它后来被 revert 了。</b>在 PostgreSQL 上失效,issue 重新打开、悬置近十年——测试全绿并不等于补丁可接受。'},
+    {x:36, y:6,  w:33, h:60, t:'<b>十年后的 PR 讨论里,三种候选方案被逐条权衡。</b>取舍理由只存在于这些 review 评论中,从未写进任何测试或文档。'},
+    {x:72, y:6,  w:26, h:60, t:'<b>把讨论里的取舍抽出来,就是一条 design constraint</b>:一个 problem + 若干 option + 各自的适用条件。这就是本文要挖的东西。'},
+    {x:36, y:73, w:62, h:20, t:'<b>今天的 agent 交出的补丁走的正是被推翻的那条路</b>:测试全过,却引入了同样的可靠性问题——「通过测试」掩盖了设计上的欠债。'}
+  ]
+};
+var ftT = {};
+function ftGo(id, i){
+  var st = FT[id]; if(!st) return;
+  var root = document.getElementById(id); if(!root) return;
+  root.setAttribute('data-step', i);
+  if(i > 0){
+    var s = st[i-1], sp = root.querySelector('.ft-spot');
+    sp.style.left = s.x+'%'; sp.style.top = s.y+'%';
+    sp.style.width = s.w+'%'; sp.style.height = s.h+'%';
+    var cap = document.getElementById('ftCap');
+    if(cap) cap.innerHTML = '<span class="ftn">'+i+'/'+st.length+'</span>'+s.t;
+  }
+  var dots = document.getElementById('ftDots');
+  if(dots) dots.innerHTML = st.map(function(_,k){ return '<i class="'+(k<i?'on':'')+'"></i>'; }).join('');
+}
+function ftNext(id){
+  clearInterval(ftT[id]);                      /* 铁律:先清定时器 */
+  var st = FT[id], root = document.getElementById(id);
+  var i = (+root.getAttribute('data-step') || 0) + 1;
+  ftGo(id, i > st.length ? 1 : i);
+}
+function ftPlay(id){
+  clearInterval(ftT[id]);
+  ftGo(id, 1);
+  ftT[id] = setInterval(function(){
+    var root = document.getElementById(id), st = FT[id];
+    var i = +root.getAttribute('data-step') || 0;
+    if(i >= st.length){ clearInterval(ftT[id]); return; }
+    ftGo(id, i+1);
+  }, 2600);
+}
+function ftReset(id){
+  clearInterval(ftT[id]);
+  ftGo(id, 0);
+  var cap = document.getElementById('ftCap');
+  if(cap) cap.innerHTML = '<b>点「下一步」开始。</b>聚光会带你按论证顺序走一遍这张原图。';
+}
+ftReset('ftDemo');
 </script>
 </body>
 </html>
