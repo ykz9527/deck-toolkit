@@ -31,14 +31,22 @@ present() {  # $1 exists in the install
 }
 
 echo "-- (1) tripwire: files still untouched since p0-baseline stay byte-identical --"
-# P2 legitimately evolved two former tripwire members, so they moved to section (2):
+# Some former tripwire members legitimately evolved since p0-baseline, so they moved
+# to section (2):
 #   references/visual-system.md      — status labels un-fixed (they contradicted paper-deck's
 #                                      论文声称/已复现/存疑, since this file fans into BOTH skills)
 #   assets/interaction-patterns.html — note that each machine is 3 parts in 3 sections
+#   references/content-logic.md      — de-repo-ified: this file fans FLAT into both showcase-deck
+#                                      (source = a code repo) and paper-deck (source = a paper),
+#                                      but its SCQA-opening and C4 guidance assumed a repo was the
+#                                      only source and mandated reordering slides — directly
+#                                      contradicting paper-deck's rule that a paper's own argument
+#                                      order governs. Now states the principle source-neutrally
+#                                      and defers slide order to the skill's own spine/structure
+#                                      reference.
 # They are not dropped: section (2) asserts each intended change is actually present, so the
 # check keeps its teeth instead of shrinking the compare set to go green.
-for f in references/content-logic.md \
-         references/extract-the-soul.md references/narrative-spine.md \
+for f in references/extract-the-soul.md references/narrative-spine.md \
          assets/img; do cmp_frozen "$f"; done
 
 echo "-- (2) evolved in P1: present + valid (not byte-checked against baseline) --"
@@ -50,15 +58,29 @@ present scripts/verify.sh
 present scripts/serve.sh
 present references/visual-system.md
 present assets/interaction-patterns.html
+present references/content-logic.md
 grep -q '^name: showcase-deck$' "$INSTALLED/SKILL.md" \
   && echo "  OK  name: showcase-deck" || { echo " FAIL: SKILL.md name is not showcase-deck"; fail=1; }
-# the two ex-tripwire files must carry the P2 change that took them out of the frozen set
+# the ex-tripwire files must carry the change that took them out of the frozen set
 grep -q '论文声称\|已复现' "$INSTALLED/references/visual-system.md" \
   && echo "  OK  visual-system status labels are skill-defined (P2)" \
   || { echo " FAIL: visual-system.md lost P2's skill-defined status labels"; fail=1; }
 grep -qi 'split across THREE sections' "$INSTALLED/assets/interaction-patterns.html" \
   && echo "  OK  gallery documents its 3-sections-per-machine layout (P2)" \
   || { echo " FAIL: interaction-patterns.html lost P2's 3-sections note"; fail=1; }
+# content-logic.md must carry the de-repo-ification: order deferred to the skill's own
+# spine/structure reference, not mandated as a universal SCQA reorder (the original defect).
+grep -q "your skill's own spine/structure reference" "$INSTALLED/references/content-logic.md" \
+  && echo "  OK  content-logic.md defers slide order to the skill's own reference" \
+  || { echo " FAIL: content-logic.md lost the order-deferral wording (de-repo-ification)"; fail=1; }
+grep -q "When the source already carries its own order" "$INSTALLED/references/content-logic.md" \
+  && echo "  OK  content-logic.md states the paper-order-governs case" \
+  || { echo " FAIL: content-logic.md lost the paper-order-governs case"; fail=1; }
+if grep -q 'Reorder slides to open SCQA-style' "$INSTALLED/references/content-logic.md"; then
+  echo " FAIL: content-logic.md still mandates unconditional SCQA reordering (contradicts paper-deck)"; fail=1
+else
+  echo "  OK  content-logic.md no longer mandates unconditional SCQA reordering"
+fi
 { [ -x "$INSTALLED/scripts/verify.sh" ] && [ -x "$INSTALLED/scripts/serve.sh" ]; } \
   && echo "  OK  scripts executable" || { echo " FAIL: verify.sh/serve.sh not +x (they run directly)"; fail=1; }
 # the evolved template must still pass verify.sh (the by-design PLACEHOLDER-REDRAW
