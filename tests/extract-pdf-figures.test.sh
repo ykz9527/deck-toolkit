@@ -79,5 +79,25 @@ HTML
 vout5="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck-modifier.html" 2>&1 || true)"
 echo "$vout5" | grep -q '  OK  architecture diagram present' && ok "T5 apx-fig with modifier class recognised by verify.sh" || bad "T5 apx-fig with modifier class NOT recognised by verify.sh"
 
+# --- T6: a cover whose portrait is a LIFTED figure (big base64 data: URI) must
+# satisfy verify.sh's cover check. The </section> sits far past the 20000-char
+# scan window, so the old regex saw no cover figure and FAILed a deck for having
+# a full-fidelity cover — which pushed authors to degrade the image to go green.
+snip="$(bash "$SCRIPT" "$TMP/sample.pdf" 1 --id cover-fig)"
+{ echo '<section class="slide cover" data-ref="s1">'; echo '<h1>t</h1>'; echo "$snip"; echo '</section>'; } > "$TMP/deck-cover.html"
+vout6="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck-cover.html" 2>&1 || true)"
+echo "$vout6" | grep -q '  OK  cover carries a project-specific figure' \
+  && ok "T6 lifted cover figure recognised by verify.sh" \
+  || bad "T6 lifted cover figure NOT recognised (check punishes full-fidelity covers)"
+
+# --- T7: the tempered match must NOT be satisfied by a figure in the NEXT slide —
+# a cover with no figure of its own stays a FAIL.
+{ echo '<section class="slide cover" data-ref="s1"><h1>t</h1></section>';
+  echo '<section class="slide" data-ref="s2">'; echo "$snip"; echo '</section>'; } > "$TMP/deck-nocover.html"
+vout7="$(bash "$HERE/../shared/scripts/verify.sh" "$TMP/deck-nocover.html" 2>&1 || true)"
+echo "$vout7" | grep -q ' FAIL cover carries a project-specific figure' \
+  && ok "T7 figureless cover still FAILs (no leak from the next slide)" \
+  || bad "T7 figureless cover wrongly passed — the match leaked across </section>"
+
 echo "RESULT: $([ $fail -eq 0 ] && echo PASS || echo ISSUES)"
 exit $fail

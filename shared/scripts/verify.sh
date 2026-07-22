@@ -77,10 +77,18 @@ check("architecture diagram present",
       "absent. Never skip it.")
 # tolerate a legitimate modifier class here too, e.g. class="slide cover dark".
 cov=re.search(r'class="[^"]*\bslide\b[^"]*\bcover\b[^"]*"(.{0,20000}?)</section>', s, re.S)
+# A cover portrait LIFTED from the source (a base64 data: URI) runs to tens of KB on
+# its own, so </section> lands far outside the window above and `cov` comes back None
+# — which used to FAIL a deck for HAVING a full-fidelity cover, pushing authors to
+# degrade the image until the check went green. So also look for a figure near the
+# cover's opening tag. The tempered (?!</section>) keeps the match inside the cover
+# section, so a figure belonging to the NEXT slide can never satisfy this.
+cov_near=re.search(r'class="[^"]*\bslide\b[^"]*\bcover\b[^"]*"(?:(?!</section>).){0,20000}?(?:<svg|<img|data-cover-fig)', s, re.S)
 # A portrait needn't be SVG — a strip of the project's REAL artifacts built in HTML is
 # just as much a portrait. Mark it data-cover-fig so this check can see it.
 check("cover carries a project-specific figure",
-      bool(cov and ("<svg" in cov.group(1) or "<img" in cov.group(1) or "data-cover-fig" in cov.group(1))),
+      bool(cov and ("<svg" in cov.group(1) or "<img" in cov.group(1) or "data-cover-fig" in cov.group(1)))
+      or bool(cov_near),
       "the cover is the first read — draw a portrait of THIS project (what it makes / its "
       "shape / its real screen); if it isn't an <svg>/<img>, mark it data-cover-fig. "
       "Test: swap in another project's name; if the figure still fits, it's filler.")
