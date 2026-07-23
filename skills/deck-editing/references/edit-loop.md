@@ -78,3 +78,32 @@ The picker lets the user shift-click multiple elements before it copies; a singl
 - **Verify after each block individually**, not once at the end. If block 3 of 5 fails, you want to know that immediately and roll back *just that edit* — batching all edits and verifying once means a failure can't be attributed to a specific change, and rollback would undo good edits along with the bad one.
 - **A shared instruction (one `✏️` at the end) can still apply differently per block** — e.g. "make these consistent" might mean the same visual change applied to each block's own markup, not literally the same diff pasted N times. Read each block's own snippet before deciding what the shared instruction means for it.
 - **Cross-page selections are fine as-is** — nothing about the loop assumes same-slide. Each block already carries its own slide number and its own `data-ref`, so locating each one is independent of the others; there's no cross-block coordination needed unless the edit is itself structural (see §3), in which case do the structural pass once, for the whole set, after you understand what all the selected elements are.
+
+## 5. Reconciling in-browser edits back into the file ("save my edited version")
+
+**First check whether this even applies.** When the deck is served by `serve.sh`, in-browser edits **write through to the file automatically** (a debounced POST to `/__save`; see `deck-mechanics.md` → Edit mode) — so `index.html` already *has* the user's edits and there's nothing to reconcile. Confirm before any merge work: `grep` a phrase they say they changed; if it's in the file, you're done — just tell them.
+
+This section is the **fallback** for when write-through wasn't in play: the deck was opened as a bare `file://`, served by an older `serve.sh` without the save endpoint, or the POSTs were failing. Then the edits live only in **localStorage on their machine** — NOT in `index.html` — and "save my edited version" can't be done by reading the file. Two honest paths:
+
+- **They tell you the changes in words** ("第 3 页那句改成 X") — just apply them as normal region-level edits. Fastest when it's a few tweaks.
+- **They export and hand you the file** — the ⭳ toolbar button downloads a `deck.html` with every edit baked in. Then reconcile it into source. **Never just overwrite `index.html` with the export.** The export is the browser's serialized live DOM: it has baked-in *runtime* content the source file fills in via JS (nav words from `MAINLINE`, animation/code-panel text, the injected picker markup), plus browser-mangled attribute order and self-closing tags. Overwriting would freeze all that and break hot-reload/serve. Instead **merge only the real text edits**:
+
+  1. Locate the exported file (ask where they put it; check `Downloads/`, the project dir, `..`).
+  2. **Diff the visible text, not the raw HTML.** Extract the text of `[data-edit]` / `[data-editlist]` elements from both the export and current `index.html` and compare those — raw-HTML diff is 90% serialization noise. A quick way: strip `<script>`, `<style>`, `<svg>`, then split on tags and `difflib` the text nodes.
+  3. **Filter the noise before trusting a difference.** Ignore anything that is: a `MAINLINE` nav word, animation/code-panel text (`[data-pre]`, step logs), or picker UI (`📍 pick…`). These differ because they're JS-injected in the export and empty in source — not a user edit.
+  4. **For each *real* text change, apply it as a targeted Edit on `index.html`** (backup → Edit → verify), exactly like a region-level edit. Emptied elements (e.g. a note-foot the user cleared to `<br>`) count — apply faithfully, but flag them back to the user in case the blank was accidental.
+  5. **Confirm parity:** re-run the text diff (export vs the now-updated source) and expect **0** real differences left (only the filtered runtime noise). State that verification to the user.
+
+  After merging, the user's browser localStorage and the file finally agree; if their screen still shows something stale, that's the §6 case — have them hit ⟲.
+
+## 6. Troubleshooting: "the page is still old"
+
+When the user says the page won't update, **suspect localStorage before cache.** In the write-through model the file is the source of truth and this is rare — but it still happens when the deck is running on the localStorage fallback (opened `file://`, or an older `serve.sh`): edits persist keyed by element index, and a re-authored file can get the *old* saved text poured back over it on load (`loadAll()`), so the server serves the new page but the screen shows the old one — and a **hard refresh does not fix it** (localStorage survives reload). This presents *exactly* like a browser or proxy cache bug; it usually isn't. (The shipped template guards against this with a content fingerprint that auto-invalidates a stale save — but an older deck built before that guard, or one whose fingerprint happens to collide, can still hit it.)
+
+Diagnose in this order — cheapest, most-likely first:
+
+1. **localStorage override (most common).** Have the user click the **⟲** toolbar button (discards local edits, reloads from the file). If the page corrects, that was it. No ⟲ button (old template)? Tell them to run `localStorage.clear()` in the console, or open a private window.
+2. **You edited the wrong file.** Confirm the served path is the file you're editing — `grep` a phrase you just wrote in the file, then `curl -s <lan-url> | grep` the same phrase. If the file has it but the response doesn't, you're serving a different copy (or a shared `dist/` got clobbered by another build).
+3. **Only now consider transport cache.** `serve.sh` sends no-store headers, so this is last. Note that a `curl` *through your own env proxy* can return a stale/`502` that the user's browser never sees — check the server's own access log for the user's actual request before blaming their cache.
+
+Do not jump to "clear your browser cache" as the first answer — it's the least likely cause and erodes trust when it doesn't work.

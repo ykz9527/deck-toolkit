@@ -116,8 +116,9 @@ Claude 用 **Read 工具直接读 PDF**——它原生支持文字与图。不�
 |------|-------|
 | 从论文里挖什么 + 诚实分级 + 术语忠实度 | `references/extract-the-paper-soul.md` |
 | 沿用论文结构定 nav + 标题写成总结(附反面例子对照表) | `references/paper-narrative.md` |
-| 每页内容逻辑(断言-证据、Rule of One) | `references/content-logic.md` |
-| 视觉语言、反 AI 味、配色/字体 | `references/visual-system.md` |
+| 每页内容逻辑(断言-证据、Rule of One、数字要有出处、封面文案) | `references/content-logic.md` |
+| 文字层面的反 AI 味(逐词清单) | `references/copy.md` |
+| 视觉语言、反 AI 味、一形一义、配色/字体 | `references/visual-system.md` |
 | 单文件结构、组件、主题、edit 模式、data-ref | `references/deck-mechanics.md` |
 | 可复制的骨架 | `assets/deck-template.html` |
 | 交互画廊——六台机器,很多种玩法;**图上导览 `figtour` 在 M1 组** | `assets/interaction-patterns.html` |

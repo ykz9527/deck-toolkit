@@ -39,12 +39,14 @@ Every slide and every semantic unit inside it carries a stable `data-ref` id so 
 
 ## Edit mode
 
-Edit mode (✎) lets the presenter reword and restructure the deck in the browser, then ⭳ export a clean standalone HTML. Two lanes, both survive reload **and** export:
+Edit mode (✎) lets the presenter reword and restructure the deck in the browser. Two lanes, both survive reload, write-through, and ⭳ export:
 
-- **Text — `data-edit`.** Any element with a bare `data-edit` becomes click-to-edit. Stored in `localStorage` keyed by index (order is fixed). Put it on every text element the user might reword.
+- **Text — `data-edit`.** Any element with a bare `data-edit` becomes click-to-edit. Keyed by document-order index (order is fixed). Put it on every text element the user might reword.
 - **Repeatable content — `data-editlist="name"`.** Wrap a container of like items (the concept cards, each readiness column's `<ul>`, the appendix points, the animation step list) in `data-editlist`. In edit mode each such container grows a **"+ 添加"** button and each item a **"×"** delete. The whole region is persisted by name (its cleaned `innerHTML`), so adding / removing / editing items all stick. Give each list a unique name.
 
-The +/× controls carry class `edit-ctl`, are injected only while editing, and are stripped before both save and export — never hand-author them. A `data-edit` element **inside** a `data-editlist` is persisted by the region, not by index (don't double-count it). Keep non-text/interactive containers out of editing (`contenteditable="false"` on the animation wrapper; the editable step rows inside re-enable themselves).
+**Persistence — write-through, with a localStorage fallback.** When the deck is served by `serve.sh`, edits POST (debounced) to a `/__save` endpoint that writes them **straight back into the on-disk file** — the file is the single source of truth, so nothing is trapped in the browser and there is nothing to reconcile later. The server rewrites *only* the inner content of the located `data-edit` / `data-editlist` element (never its tag, attributes, or structure), so a save can't corrupt the document; the injected hot-reload ignores the mtime bump a page causes by its *own* save (so typing never reloads), but still reloads on another viewer's edit or a hand-edit to the file. **Fallback:** opened as a bare `file://`, or with no server, edits persist to `localStorage` (keyed by index); a content fingerprint auto-invalidates a stale save if the file was re-authored on disk, and the ⟲ toolbar button discards local edits and reloads from the file. `⭳` still exports a clean standalone HTML for sharing. (Write-through is a LAN dev-preview convenience — the save endpoint is reachable by anyone who can reach the port; serve on a trusted network. See `serve.sh`.)
+
+The +/× controls carry class `edit-ctl`, are injected only while editing, and are stripped before save/write/export — never hand-author them. A `data-edit` element **inside** a `data-editlist` is persisted by the region, not by index (don't double-count it). Keep non-text/interactive containers out of editing (`contenteditable="false"` on the animation wrapper; the editable step rows inside re-enable themselves).
 
 ## Static diagrams — required, drawio preferred, SVG fallback
 

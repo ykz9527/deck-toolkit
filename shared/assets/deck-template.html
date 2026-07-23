@@ -470,9 +470,10 @@
   <button id="themeBtn" onclick="toggleTheme()" title="暗 / 暖 配色">☀</button>
   <button id="editBtn" onclick="toggleEdit()" title="编辑文字">✎</button>
   <button onclick="exportHTML()" title="导出编辑后的 HTML">⭳</button>
+  <button onclick="resetEdits()" title="丢弃本地编辑,恢复文件里的原文">⟲</button>
   <button onclick="document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()" title="全屏">⤢</button>
 </div>
-<div class="edit-hint" id="editHint">编辑模式 · 点文字直接改 · 列表旁「+ 添加」/条目上「×」删除 · 自动存本地 · ✎ 退出 · ⭳ 导出</div>
+<div class="edit-hint" id="editHint">编辑模式 · 点文字直接改 · 列表旁「+ 添加」/条目上「×」删除 · 自动存本地 · ✎ 退出 · ⭳ 导出 · ⟲ 丢弃本地改动</div>
 
 <script>
   /* ================= THE MAINLINE — the one place the deck's through-line lives =========
@@ -532,9 +533,41 @@
   var protos={};
   lists.forEach(function(l){var f=l.querySelector(':scope > *');if(f)protos[l.getAttribute('data-editlist')]=f.cloneNode(true);});
 
+  /* Save fingerprint — WHY this exists (a real, painful bug without it):
+     edits persist to localStorage keyed by element INDEX. When the .html file
+     is later re-authored (a slide added, text rewritten on disk), loadAll()
+     would blindly pour the OLD saved text back over the fresh file by index —
+     the server serves the new page, the screen shows the old one, and a hard
+     refresh does NOT help (localStorage survives reload). Diagnosis-trap: it
+     looks exactly like a browser/proxy cache bug and is NOT.
+     Fix: fingerprint the file's own content BEFORE loadAll runs; any on-disk
+     edit changes the fingerprint, so a stale save auto-invalidates. */
+  function sigOf(){
+    return idxEd.length + ':' + idxEd.map(function(el){return el.innerHTML.length;}).join(',')
+         + '|' + lists.map(function(l){return l.children.length;}).join(',');
+  }
+  var BASE_SIG = sigOf();
+
   function cleanHTML(el){var c=el.cloneNode(true);c.querySelectorAll('.edit-ctl').forEach(function(e){e.remove();});c.querySelectorAll('[contenteditable]').forEach(function(e){e.removeAttribute('contenteditable');});return c.innerHTML;}
-  function saveAll(){var o={t:{},l:{}};idxEd.forEach(function(el,i){o.t[i]=el.innerHTML;});lists.forEach(function(el){o.l[el.getAttribute('data-editlist')]=cleanHTML(el);});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
-  function loadAll(){var r;try{r=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){r={};}if(r.l)lists.forEach(function(el){var v=r.l[el.getAttribute('data-editlist')];if(v!=null)el.innerHTML=v;});if(r.t)idxEd.forEach(function(el,i){if(r.t[i]!=null)el.innerHTML=r.t[i];});}
+  /* Write-through: when served by serve.sh, POST edits back to the file on disk
+     so the file stays the single source of truth (nothing trapped in localStorage,
+     nothing to export-and-merge later). localStorage is only the offline fallback
+     (deck opened as a bare file://, or the server absent). Debounced because
+     saveAll fires on every keystroke; the self-write flag tells the injected
+     hot-reload to ignore the mtime bump WE cause, so typing never reloads the page. */
+  var _writeT=null;
+  function writeThrough(o){
+    if(location.protocol.indexOf('http')!==0)return;           // file:// → localStorage only
+    window.__deckSelfWrite=Date.now()+2500;
+    fetch('/__save',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({t:o.t,l:o.l})}).catch(function(){}); // no server → fallback already saved
+  }
+  function saveAll(){var o={t:{},l:{},sig:BASE_SIG};idxEd.forEach(function(el,i){o.t[i]=cleanHTML(el);});lists.forEach(function(el){o.l[el.getAttribute('data-editlist')]=cleanHTML(el);});try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}
+    if(_writeT)clearTimeout(_writeT);_writeT=setTimeout(function(){writeThrough(o);},600);}
+  function loadAll(){var r;try{r=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){r={};}
+    if(r.sig!==BASE_SIG){try{localStorage.removeItem(STORE_KEY);}catch(e){}return;}
+    if(r.l)lists.forEach(function(el){var v=r.l[el.getAttribute('data-editlist')];if(v!=null)el.innerHTML=v;});if(r.t)idxEd.forEach(function(el,i){if(r.t[i]!=null)el.innerHTML=r.t[i];});}
+  function resetEdits(){try{localStorage.removeItem(STORE_KEY);}catch(e){}location.reload();}
 
   function reindex(list){var i=0;[].slice.call(list.querySelectorAll(':scope > *:not(.edit-ctl)')).forEach(function(el){el.setAttribute('data-s',i++);});}
   function decorateItem(item){

@@ -28,6 +28,8 @@ The template ships a coherent design language. Keep it. Recolor semantics per pr
 - Strong type hierarchy: big serif h1/h2, small mono uppercase labels, readable body.
 - Let whitespace and a single accent do the work.
 
+**One shape = one meaning (focal integrity).** A distinctive visual form — a card with a colored title band, a particular accent color, a badge style — reads as *a type of thing*. The moment you reuse that same form for something that isn't that thing, the page loses its focal point and the reader can't tell what matters. Example that bit us: cards were the shape for "knowledge node"; drawing the schema, the prompt, and the validator *also* as cards flattened four different kinds of thing into one visual rank — "I can't find the point of this page." Fix: keep the marked form 1:1 with its one meaning; everything else on the slide steps down to a plainer treatment (a labeled line, a caption, a lead-in tag), so the one real subject stays loudest.
+
 ## Readability (presentation, not a webpage)
 
 This gets projected and read from across a room. The template base is **17px**; keep readable prose at ~14px+ (labels/mono tags may be smaller). If body copy feels cramped, the fix is *less text*, not *smaller text*.

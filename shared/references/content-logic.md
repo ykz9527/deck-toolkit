@@ -37,6 +37,7 @@ Either way, this is the antidote to "bio → history → background → … → 
 - **One idea per slide.** If you're saying "and also…", that's the next slide.
 - **≤ ~7 visual elements** on any diagram/slide (boxes + lines + labels all count). Over that, the audience stops parsing.
 - **Body prose ≤ ~50 words.** Anything more is speaker narration, not a slide. When it feels cramped, the fix is *less text*, never smaller text.
+- **Every on-slide number needs provenance or a referent.** A figure that appears with no setup ("六种改动", "18 checks") gives the audience nothing to anchor it to. It's allowed only if it either (a) traces to real repo evidence — you counted it in the code/data before writing it, not estimated — or (b) has a same-slide referent it points back to ("the same checks as the previous page"). Neither? Cut it, or restate without the number. A wrong or unbacked count is caught instantly and it's the fastest way to lose the room.
 - This is *why* the deck splits story (plain, sparse) from appendix (depth) — it keeps each story slide inside the budget.
 
 ## Complex structure: layer it, don't dump it
@@ -78,11 +79,28 @@ When a slide has to justify *why this design* (a schema, a datastore, an archite
 
 Don't drop a finished mega-diagram at once. Start minimal, then **"introduce a challenge → add the component that solves it"**, step by step: show the naive design → "what happens at 10× load?" → reveal the scaling piece → "and if the primary dies?" → reveal failover. The audience re-lives the design's evolution instead of decoding a static result. This is exactly what the interactive animation (`deck-mechanics.md`) is for — challenge-driven staging, not a passive left-to-right pipeline.
 
+## The cover copy — the hardest sentence, budget for iterations
+
+The cover figure has an archetype menu (`visual-system.md` → The cover); the cover *copy* has none and is where the most rewrites happen. Anchor it with four questions, in this order:
+
+- **Subject first, means second.** Lead with *what this project is / does*, not the clever mechanism behind it. "New AI-native way to…" buries the subject; "Build a new X — here's what changed" states it. If the first noun the reader meets is a technique, reorder.
+- **Macro, not operational.** The cover states the *idea / positioning*; how it actually works unfolds on later slides. A cover that reads like step-1-of-a-tutorial is too low. ("具体怎么操作后面再展开.")
+- **Tight, not colloquial.** Plain language is the goal, but the cover is still the most composed sentence in the deck — don't over-correct plainness into chattiness. Rigor and plainness are not opposites.
+- **Say the one thing plainly.** If the human's actual job is "define a schema", the cover says *define a schema* — not a grand umbrella phrase for it.
+
+Expect several passes here and don't treat that as failure; the cover earns disproportionate rewrites because it's the first read.
+
+## Prose is part of the design — avoid "AI slop" in words, not just visuals
+
+`visual-system.md`'s "no AI slop" is about the *look* (gradients, badges, emoji). Words have the same failure mode. → `references/copy.md`. In short: specific verbs over vague ones; cut em-dash pile-ups and rhetorical questions; no empty attitude words ("powerful", "seamless", "简单地"); turn stiff spec-speak ("经过分析判断后形成的认知知识") into plain human phrasing without sliding into chatty. Plain ≠ colloquial. (For a deep pass, the external `hallmark` skill is a good pairing.)
+
 ## The checklist (run against every story slide)
 
 - [ ] Title is a full sentence stating this slide's conclusion (not a topic word).
 - [ ] The body is visual evidence for that title, not a bullet dump.
 - [ ] One idea; ≤ ~7 elements; ≤ ~50 words of prose.
+- [ ] Every number on the slide traces to repo evidence or a same-slide referent — no bare, unbacked counts.
+- [ ] Any factual claim (field name, ownership, behavior) is checked against the source, not plausibly invented.
 - [ ] Any complex structure (a code repo's architecture, a paper's method figure) is disclosed at the right zoom level for this audience; every arrow/color means something.
 - [ ] Any "why this design" slide shows the trade-off, not just the winner.
 - [ ] Reading titles alone reconstructs the argument.

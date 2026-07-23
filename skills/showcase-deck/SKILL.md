@@ -61,8 +61,9 @@ These are not aspirations — they are checked, and the template already ships t
 |------|-------|
 | What to mine from the repo + honesty rules + vocabulary fidelity | `references/extract-the-soul.md` |
 | Choosing the mainline + nav signposting | `references/narrative-spine.md` |
-| Per-slide content logic (SCQA, assertion-evidence, Rule of One, C4, trade-offs) | `references/content-logic.md` |
-| Design language, anti-AI-slop, palette/fonts | `references/visual-system.md` |
+| Per-slide content logic (SCQA, assertion-evidence, Rule of One, numeric provenance, cover copy, C4, trade-offs) | `references/content-logic.md` |
+| Prose that isn't "AI slop" (word-level anti-slop checklist) | `references/copy.md` |
+| Design language, anti-AI-slop visuals, one-shape-one-meaning, palette/fonts | `references/visual-system.md` |
 | Single-file structure, slide components, themes, edit mode, animations | `references/deck-mechanics.md` |
 | Proven skeleton to copy (2 interaction scaffolds + figure, all wired) | `assets/deck-template.html` |
 | **Gallery of working interactions — 6 machines, many moves** — open in a browser, copy one in | `assets/interaction-patterns.html` |
